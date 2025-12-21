@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Input, Loader, PageHeader } from '../components/common';
 import { createUser, getUser, updateUser } from '../api/usersApi';
 import { listRoles } from '../api/rolesApi';
 
@@ -113,9 +112,13 @@ const UserForm = () => {
 
   return (
     <div>
-      <Header title={isEditing ? 'Edit User' : 'Create User'} />
+      <PageHeader
+        icon="U"
+        title={isEditing ? 'Edit User' : 'Create User'}
+        subtitle={isEditing ? 'Update user details' : 'Add a new user'}
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-6 mt-6 max-w-2xl">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         {errors.submit && (
           <div className="p-4 bg-danger-500/10 border border-danger-500/30 rounded-xl text-danger-400">
             {errors.submit}

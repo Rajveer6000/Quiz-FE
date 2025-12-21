@@ -4,8 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Card, Button, Input, Badge } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Input, Badge, PageHeader } from '../components/common';
 import { useAuth } from '../context';
 import { resetPassword } from '../api/usersApi';
 import { ROLE_NAMES } from '../constants/constants';
@@ -82,9 +81,13 @@ const Profile = () => {
 
   return (
     <div>
-      <Header title="Profile" />
+      <PageHeader
+        icon="P"
+        title="Profile"
+        subtitle="View and manage your account"
+      />
 
-      <div className="space-y-6 mt-6 max-w-2xl">
+      <div className="space-y-6 max-w-2xl">
         {error && (
           <div className="p-4 bg-danger-500/10 border border-danger-500/30 rounded-xl text-danger-400">
             {error}

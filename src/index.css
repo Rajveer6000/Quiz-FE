@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @import "tailwindcss";
 
 /* =============================================================================
@@ -176,12 +178,13 @@ a:hover {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.625rem 1.25rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   font-weight: 500;
   font-size: 0.875rem;
-  transition: all 0.2s;
+  transition: all 0.15s ease-out;
   cursor: pointer;
   border: none;
+  white-space: nowrap;
 }
 
 .btn:disabled {
@@ -190,69 +193,80 @@ a:hover {
 }
 
 .btn-primary {
-  background: linear-gradient(to right, var(--color-primary-600), var(--color-primary-500));
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
   color: white;
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(to right, var(--color-primary-500), var(--color-primary-400));
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-500));
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-primary:active:not(:disabled) {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 4px rgba(59, 130, 246, 0.2);
 }
 
 .btn-accent {
-  background: linear-gradient(to right, var(--color-accent-600), var(--color-accent-500));
+  background: linear-gradient(135deg, var(--color-accent-500), var(--color-accent-600));
   color: white;
-  box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
 }
 
 .btn-accent:hover:not(:disabled) {
-  background: linear-gradient(to right, var(--color-accent-500), var(--color-accent-400));
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, var(--color-accent-400), var(--color-accent-500));
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-success {
-  background: linear-gradient(to right, var(--color-success-600), var(--color-success-500));
+  background: linear-gradient(135deg, var(--color-success-500), var(--color-success-600));
   color: white;
-  box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.25);
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
 }
 
 .btn-success:hover:not(:disabled) {
-  background: linear-gradient(to right, var(--color-success-500), var(--color-success-400));
-  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, var(--color-success-400), var(--color-success-500));
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
-  background: var(--color-danger-600);
+  background: linear-gradient(135deg, var(--color-danger-500), var(--color-danger-600));
   color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: var(--color-danger-500);
+  background: linear-gradient(135deg, var(--color-danger-400), var(--color-danger-500));
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-ghost {
   background: transparent;
-  color: #d1d5db;
+  color: #9ca3af;
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   color: white;
+}
+
+.btn-ghost:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .btn-outline {
   background: transparent;
-  border: 2px solid rgba(59, 130, 246, 0.5);
+  border: 1.5px solid rgba(59, 130, 246, 0.4);
   color: var(--color-primary-400);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(59, 130, 246, 0.08);
   border-color: var(--color-primary-400);
   color: var(--color-primary-300);
 }
@@ -286,46 +300,6 @@ a:hover {
 .input-error:focus {
   border-color: var(--color-danger-500);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-}
-
-/* Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.badge-primary {
-  background: rgba(59, 130, 246, 0.2);
-  color: var(--color-primary-400);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.badge-success {
-  background: rgba(34, 197, 94, 0.2);
-  color: var(--color-success-400);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.badge-warning {
-  background: rgba(234, 179, 8, 0.2);
-  color: var(--color-warning-400);
-  border: 1px solid rgba(234, 179, 8, 0.3);
-}
-
-.badge-danger {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--color-danger-400);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.badge-accent {
-  background: rgba(139, 92, 246, 0.2);
-  color: var(--color-accent-400);
-  border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
 /* Question Status */
@@ -472,47 +446,6 @@ a:hover {
   border-bottom: 2px solid var(--color-primary-500);
 }
 
-/* Table */
-.table-container {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.table {
-  width: 100%;
-  font-size: 0.875rem;
-}
-
-.table thead {
-  background: rgba(17, 24, 39, 0.5);
-}
-
-.table th {
-  padding: 1rem 1.5rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.table tbody tr {
-  border-top: 1px solid rgba(31, 41, 55, 0.5);
-  transition: background 0.2s;
-}
-
-.table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.table td {
-  padding: 1rem 1.5rem;
-  color: #d1d5db;
-}
 
 /* Modal */
 .modal-overlay {
@@ -628,8 +561,23 @@ a:hover {
   }
 }
 
-/* =============================================================================
-   GOOGLE FONTS IMPORT
-   ============================================================================= */
+/* Loading Bar Animation */
+.loading-bar {
+  width: 100%;
+  animation: loading-slide 1s ease-in-out infinite;
+  background-size: 200% 100%;
+}
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@keyframes loading-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}

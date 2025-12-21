@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, Modal, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Badge, Modal, Table, PageHeader } from '../components/common';
 import { listTests, deleteTest, finalizeTest } from '../api';
 
 const TestList = () => {
@@ -72,10 +71,110 @@ const TestList = () => {
     });
   };
 
+  const columns = [
+    {
+      key: 'name',
+      title: 'Test',
+      className: 'max-w-xl',
+      render: (test) => (
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <p className="text-white font-semibold">{test.name}</p>
+            <Badge variant={test.isFinal ? 'success' : 'warning'} dot>
+              {test.isFinal ? 'Finalized' : 'Draft'}
+            </Badge>
+          </div>
+          {test.description && (
+            <p className="table-meta line-clamp-1">{test.description}</p>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'questions',
+      title: 'Questions',
+      render: (test) => (
+        <div className="space-y-1">
+          <p className="text-white font-semibold">{test.totalQuestions || 0}</p>
+          <p className="text-xs text-slate-400">{test.totalMarks || 0} marks</p>
+        </div>
+      ),
+    },
+    {
+      key: 'duration',
+      title: 'Duration',
+      render: (test) => (
+        <div className="space-y-1">
+          <p className="text-white font-semibold">{test.durationMin || 0} mins</p>
+          <p className="text-xs text-slate-400">{test.price > 0 ? `₹${test.price}` : 'Free'}</p>
+        </div>
+      ),
+    },
+    {
+      key: 'window',
+      title: 'Window',
+      render: (test) => (
+        <div className="space-y-1">
+          <p className="text-white font-semibold">
+            {test.startTime ? formatDate(test.startTime) : 'Not scheduled'}
+          </p>
+          <p className="text-xs text-slate-400">
+            {test.endTime ? `Ends ${formatDate(test.endTime)}` : '—'}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      align: 'right',
+      render: (test) => (
+        <div className="flex justify-end gap-2">
+          {!test.isFinal ? (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(`/tests/${test.id}/edit`)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="accent"
+                size="sm"
+                onClick={() => setFinalizeModal({ open: true, test })}
+              >
+                Finalize
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-danger-400 hover:text-danger-300"
+                onClick={() => setDeleteModal({ open: true, test })}
+              >
+                Delete
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/tests/${test.id}`)}
+            >
+              View
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
-      <Header
+      <PageHeader
+        icon="T"
         title="Tests"
+        subtitle="Manage your tests and quizzes"
         actions={
           <Button variant="primary" onClick={() => navigate('/tests/new')}>
             + Create Test
@@ -83,118 +182,27 @@ const TestList = () => {
         }
       />
 
-      <div className="space-y-6 mt-6">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader size="lg" />
-          </div>
-        ) : tests.length === 0 ? (
-          <Card className="text-center py-12">
-            <div className="text-gray-500">
-              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-              </svg>
-              <p className="text-lg">No tests found</p>
-              <p className="text-sm mt-1">Create your first test to get started</p>
-              <Button variant="primary" className="mt-4" onClick={() => navigate('/tests/new')}>
-                + Create Test
-              </Button>
-            </div>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {tests.map((test) => (
-              <Card key={test.id} hover>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold text-white">{test.name}</h3>
-                      {test.isFinal ? (
-                        <Badge variant="success" dot>Finalized</Badge>
-                      ) : (
-                        <Badge variant="warning" dot>Draft</Badge>
-                      )}
-                    </div>
-                    {test.description && (
-                      <p className="text-gray-400 mt-1 line-clamp-2">{test.description}</p>
-                    )}
-                    <div className="flex flex-wrap gap-4 mt-4 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {test.totalQuestions || 0} Questions
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {test.durationMin || 0} mins
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        {test.totalMarks || 0} Marks
-                      </span>
-                      {test.price > 0 && (
-                        <span className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          ₹{test.price}
-                        </span>
-                      )}
-                    </div>
-                    {test.startTime && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        Window: {formatDate(test.startTime)} - {formatDate(test.endTime)}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    {!test.isFinal && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/tests/${test.id}/edit`)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="accent"
-                          size="sm"
-                          onClick={() => setFinalizeModal({ open: true, test })}
-                        >
-                          Finalize
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-danger-400 hover:text-danger-300"
-                          onClick={() => setDeleteModal({ open: true, test })}
-                        >
-                          Delete
-                        </Button>
-                      </>
-                    )}
-                    {test.isFinal && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/tests/${test.id}`)}
-                      >
-                        View
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+      <div className="space-y-6">
+        <Table
+          columns={columns}
+          data={tests}
+          rowKey="id"
+          isLoading={loading}
+          emptyState={
+            <Card className="text-center py-12 w-full">
+              <div className="text-gray-500">
+                <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <p className="text-lg">No tests found</p>
+                <p className="text-sm mt-1">Create your first test to get started</p>
+                <Button variant="primary" className="mt-4" onClick={() => navigate('/tests/new')}>
+                  + Create Test
+                </Button>
+              </div>
+            </Card>
+          }
+        />
 
         {/* Pagination */}
         {pagination.total > pagination.pageSize && (

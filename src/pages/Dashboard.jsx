@@ -3,8 +3,7 @@
  * Overview with stats and quick actions
  */
 
-import { Card, Button, Badge } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Badge, PageHeader } from '../components/common';
 
 const Dashboard = () => {
   // Mock data - would come from API in real app
@@ -23,9 +22,13 @@ const Dashboard = () => {
 
   return (
     <div>
-      <Header title="Dashboard" />
+      <PageHeader
+        icon="D"
+        title="Dashboard"
+        subtitle="Overview of your quiz platform"
+      />
       
-      <div className="space-y-6 mt-6">
+      <div className="space-y-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, index) => (

@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Badge, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Input, Badge, Loader, PageHeader } from '../components/common';
 import { createTest, getTest, updateTest } from '../api';
 
 const TestForm = () => {
@@ -109,9 +108,13 @@ const TestForm = () => {
 
   return (
     <div>
-      <Header title={isEditing ? 'Edit Test' : 'Create Test'} />
+      <PageHeader
+        icon="T"
+        title={isEditing ? 'Edit Test' : 'Create Test'}
+        subtitle={isEditing ? 'Update test details' : 'Create a new test'}
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-6 mt-6 max-w-4xl">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
         {errors.submit && (
           <div className="p-4 bg-danger-500/10 border border-danger-500/50 rounded-xl text-danger-400">
             {errors.submit}

@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, Input, Modal, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Badge, Input, Modal, Loader, PageHeader } from '../components/common';
 import { getTest, addQuestionToTest, listQuestions, listQuestionTypes } from '../api';
 import { DIFFICULTY_LABELS } from '../constants/constants';
 
@@ -274,7 +273,11 @@ const TestQuestions = () => {
   if (!section) {
     return (
       <div>
-        <Header title="Section Not Found" />
+        <PageHeader
+          icon="!"
+          title="Section Not Found"
+          subtitle="The requested section was not found"
+        />
         <Card className="mt-6 text-center py-12">
           <p className="text-gray-400">The requested section was not found.</p>
           <Button variant="primary" className="mt-4" onClick={() => navigate(`/tests/${testId}/edit`)}>
@@ -287,8 +290,10 @@ const TestQuestions = () => {
 
   return (
     <div>
-      <Header
+      <PageHeader
+        icon="Q"
         title={`Manage Questions - ${section.sectionName}`}
+        subtitle="Add or create questions for this section"
         actions={
           <Button variant="ghost" onClick={() => navigate(`/tests/${testId}/edit`)}>
             ← Back to Test
@@ -296,7 +301,7 @@ const TestQuestions = () => {
         }
       />
 
-      <div className="space-y-6 mt-6">
+      <div className="space-y-6">
         {/* Section Info */}
         <Card>
           <div className="flex items-center justify-between">

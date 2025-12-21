@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, Modal, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Badge, Modal, Loader, PageHeader } from '../components/common';
 import { listTests, startAttempt } from '../api';
 
 const TakeTest = () => {
@@ -53,9 +52,13 @@ const TakeTest = () => {
 
   return (
     <div>
-      <Header title="Take a Test" />
+      <PageHeader
+        icon="T"
+        title="Take a Test"
+        subtitle="Browse and start available tests"
+      />
 
-      <div className="space-y-6 mt-6">
+      <div className="space-y-6">
         {loading ? (
           <div className="flex justify-center py-12">
             <Loader size="lg" />

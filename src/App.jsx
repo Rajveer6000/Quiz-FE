@@ -3,8 +3,9 @@
  * Main application component with routing and authentication
  */
 
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider, ProtectedRoute, StaffRoute, ExamineeRoute, PublicRoute } from './context';
+import { AuthProvider, ProtectedRoute, StaffRoute, ExamineeRoute, PublicRoute, LoadingProvider, useLoading, setLoadingCallbacks } from './context';
 import { Layout } from './components/layout';
 import {
   // Auth
@@ -27,6 +28,8 @@ import {
   // Staff - Roles
   RoleList,
   RoleForm,
+  // Staff - Examinees
+  ExamineeList,
   // Examinee
   ExamineeDashboard,
   TakeTest,
@@ -35,18 +38,31 @@ import {
   History,
 } from './pages';
 
+// Component to wire loading callbacks
+const LoadingWire = () => {
+  const { startLoading, stopLoading } = useLoading();
+  
+  useEffect(() => {
+    setLoadingCallbacks(startLoading, stopLoading);
+  }, [startLoading, stopLoading]);
+  
+  return null;
+};
+
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/login/examinee" element={<PublicRoute><ExamineeLogin /></PublicRoute>} />
-          <Route path="/register/examinee" element={<PublicRoute><ExamineeRegister /></PublicRoute>} />
+      <LoadingProvider>
+        <AuthProvider>
+          <LoadingWire />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/login/examinee" element={<PublicRoute><ExamineeLogin /></PublicRoute>} />
+            <Route path="/register/examinee" element={<PublicRoute><ExamineeRegister /></PublicRoute>} />
 
-          {/* Test Attempt - Full screen without sidebar */}
-          <Route path="/attempt/:attemptId" element={
+            {/* Test Attempt - Full screen without sidebar */}
+            <Route path="/attempt/:attemptId" element={
             <ProtectedRoute>
               <TestAttempt />
             </ProtectedRoute>
@@ -70,6 +86,9 @@ function App() {
             <Route path="/roles" element={<RoleList />} />
             <Route path="/roles/new" element={<RoleForm />} />
             <Route path="/roles/:id/edit" element={<RoleForm />} />
+            
+            {/* Examinees */}
+            <Route path="/examinees" element={<ExamineeList />} />
             
             {/* Questions */}
             <Route path="/questions" element={<QuestionList />} />
@@ -107,8 +126,9 @@ function App() {
             <Route path="/history" element={<History />} />
             <Route path="/results/:attemptId" element={<Results />} />
           </Route>
-        </Routes>
-      </AuthProvider>
+          </Routes>
+        </AuthProvider>
+      </LoadingProvider>
     </BrowserRouter>
   );
 }

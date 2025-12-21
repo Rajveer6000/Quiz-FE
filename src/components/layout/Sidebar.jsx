@@ -81,6 +81,12 @@ const Sidebar = () => {
       visible: canRead(MODULES.USERS)
     },
     { 
+      path: '/examinees', 
+      icon: UsersIcon, 
+      label: 'Examinees',
+      visible: canRead(MODULES.USERS)
+    },
+    { 
       path: '/roles', 
       icon: RolesIcon, 
       label: 'Roles',

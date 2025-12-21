@@ -5,6 +5,7 @@
 
 import axios from 'axios';
 import { API_BASE_URL, STORAGE_KEYS } from '../constants/constants';
+import { getLoadingCallbacks } from '../context/LoadingContext';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -15,9 +16,12 @@ const api = axios.create({
   timeout: 30000, // 30 seconds
 });
 
-// Request interceptor - Add auth token to requests
+// Request interceptor - Add auth token and trigger loading
 api.interceptors.request.use(
   (config) => {
+    // Start global loading
+    getLoadingCallbacks().start();
+    
     const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -25,16 +29,20 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    getLoadingCallbacks().stop();
     return Promise.reject(error);
   }
 );
 
-// Response interceptor - Handle common errors
+// Response interceptor - Handle common errors and stop loading
 api.interceptors.response.use(
   (response) => {
+    getLoadingCallbacks().stop();
     return response.data;
   },
   (error) => {
+    getLoadingCallbacks().stop();
+    
     // Handle specific error cases
     if (error.response) {
       const { status, data } = error.response;

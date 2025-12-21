@@ -5,42 +5,63 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Input, Loader, PageHeader } from '../components/common';
 import { createRole, getRole, updateRole } from '../api/rolesApi';
-import { MODULES } from '../constants/constants';
-
-const moduleList = [
-  { id: 1, slug: MODULES.USERS, name: 'User Management' },
-  { id: 2, slug: MODULES.ROLES, name: 'Role Management' },
-  { id: 3, slug: MODULES.ORGANIZATIONS, name: 'Organization Management' },
-  { id: 4, slug: MODULES.QUIZZES, name: 'Quiz/Test Management' },
-  { id: 5, slug: MODULES.ANALYTICS, name: 'Analytics Dashboard' },
-  { id: 7, slug: MODULES.EXAMINEE, name: 'Examinee Features' },
-];
+import { getOrganizationModules } from '../api/organizationsApi';
 
 const RoleForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = Boolean(id);
 
-  const [loading, setLoading] = useState(isEditing);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [moduleList, setModuleList] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    modules: moduleList.reduce((acc, mod) => ({
-      ...acc,
-      [mod.id]: { moduleId: mod.id, canCreate: false, canRead: false, canUpdate: false, canDelete: false }
-    }), {}),
+    modules: {},
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    if (isEditing) {
+    fetchModules();
+  }, []);
+
+  useEffect(() => {
+    if (isEditing && moduleList.length > 0) {
       fetchRole();
     }
-  }, [id]);
+  }, [id, moduleList]);
+
+  const fetchModules = async () => {
+    try {
+      const response = await getOrganizationModules();
+      if (response.success) {
+        // Filter out 'examinee' module and sort by id
+        const modules = (response.data.modules || [])
+          .filter(m => m.moduleSlug !== 'examinee')
+          .sort((a, b) => parseInt(a.id) - parseInt(b.id));
+        
+        setModuleList(modules);
+        
+        // Initialize form modules
+        const initialModules = modules.reduce((acc, mod) => ({
+          ...acc,
+          [mod.id]: { moduleId: parseInt(mod.id), canCreate: false, canRead: false, canUpdate: false, canDelete: false }
+        }), {});
+        
+        setFormData(prev => ({ ...prev, modules: initialModules }));
+        
+        if (!isEditing) {
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch modules:', error);
+      setLoading(false);
+    }
+  };
 
   const fetchRole = async () => {
     try {
@@ -49,14 +70,16 @@ const RoleForm = () => {
         const role = response.data;
         const modules = { ...formData.modules };
         
+        // Map API response - modules have id and nested permission object
         role.modules?.forEach(mod => {
-          if (modules[mod.moduleId]) {
-            modules[mod.moduleId] = {
-              moduleId: mod.moduleId,
-              canCreate: mod.canCreate || false,
-              canRead: mod.canRead || false,
-              canUpdate: mod.canUpdate || false,
-              canDelete: mod.canDelete || false,
+          const moduleId = mod.id;
+          if (modules[moduleId]) {
+            modules[moduleId] = {
+              moduleId: moduleId,
+              canCreate: mod.permission?.canCreate || false,
+              canRead: mod.permission?.canRead || false,
+              canUpdate: mod.permission?.canUpdate || false,
+              canDelete: mod.permission?.canDelete || false,
             };
           }
         });
@@ -116,8 +139,16 @@ const RoleForm = () => {
 
     setSaving(true);
     try {
+      // Transform modules to API format: moduleId, create, read, update, delete
       const modules = Object.values(formData.modules)
-        .filter(m => m.canCreate || m.canRead || m.canUpdate || m.canDelete);
+        .filter(m => m.canCreate || m.canRead || m.canUpdate || m.canDelete)
+        .map(m => ({
+          moduleId: m.moduleId,
+          create: m.canCreate,
+          read: m.canRead,
+          update: m.canUpdate,
+          delete: m.canDelete,
+        }));
 
       const payload = {
         name: formData.name,
@@ -145,9 +176,13 @@ const RoleForm = () => {
 
   return (
     <div>
-      <Header title={isEditing ? 'Edit Role' : 'Create Role'} />
+      <PageHeader
+        icon="R"
+        title={isEditing ? 'Edit Role' : 'Create Role'}
+        subtitle={isEditing ? 'Update role permissions' : 'Create a new role'}
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-6 mt-6 max-w-4xl">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
         {errors.submit && (
           <div className="p-4 bg-danger-500/10 border border-danger-500/30 rounded-xl text-danger-400">
             {errors.submit}

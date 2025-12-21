@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, Modal, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Badge, Modal, Table, PageHeader } from '../components/common';
 import { listRoles, deleteRole } from '../api/rolesApi';
 
 const RoleList = () => {
@@ -46,10 +45,69 @@ const RoleList = () => {
 
   const isSystemRole = (roleId) => [1, 2, 3].includes(roleId);
 
+  const columns = [
+    {
+      key: 'name',
+      title: 'Role',
+      render: (role) => (
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="text-white font-semibold">{role.name}</p>
+            {role.description && (
+              <p className="text-xs text-slate-400">{role.description}</p>
+            )}
+          </div>
+          {isSystemRole(role.id) && (
+            <Badge variant="accent">System</Badge>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'type',
+      title: 'Type',
+      render: (role) => (
+        <Badge variant={isSystemRole(role.id) ? 'accent' : 'primary'}>
+          {isSystemRole(role.id) ? 'Built-in' : 'Custom'}
+        </Badge>
+      ),
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      align: 'right',
+      render: (role) => (
+        isSystemRole(role.id) ? (
+          <span className="text-gray-500 text-sm">Managed</span>
+        ) : (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/roles/${role.id}/edit`)}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-danger-400 hover:text-danger-300"
+              onClick={() => setDeleteModal({ open: true, role })}
+            >
+              Delete
+            </Button>
+          </div>
+        )
+      ),
+    },
+  ];
+
   return (
     <div>
-      <Header
+      <PageHeader
+        icon="R"
         title="Roles"
+        subtitle="Manage user roles and permissions"
         actions={
           <Button variant="primary" onClick={() => navigate('/roles/new')}>
             + Create Role
@@ -57,61 +115,23 @@ const RoleList = () => {
         }
       />
 
-      <div className="space-y-6 mt-6">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader size="lg" />
-          </div>
-        ) : roles.length === 0 ? (
-          <Card className="text-center py-12">
-            <div className="text-gray-500">
-              <p className="text-lg">No roles found</p>
-              <Button variant="primary" className="mt-4" onClick={() => navigate('/roles/new')}>
-                + Create Role
-              </Button>
-            </div>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {roles.map((role) => (
-              <Card key={role.id} hover>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold text-white">{role.name}</h3>
-                      {isSystemRole(role.id) && (
-                        <Badge variant="accent">System</Badge>
-                      )}
-                    </div>
-                    {role.description && (
-                      <p className="text-gray-400 mt-1">{role.description}</p>
-                    )}
-                  </div>
-
-                  {!isSystemRole(role.id) && (
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/roles/${role.id}/edit`)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-danger-400 hover:text-danger-300"
-                        onClick={() => setDeleteModal({ open: true, role })}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+      <div className="space-y-6">
+        <Table
+          columns={columns}
+          data={roles}
+          rowKey="id"
+          isLoading={loading}
+          emptyState={
+            <Card className="text-center py-12 w-full">
+              <div className="text-gray-500">
+                <p className="text-lg">No roles found</p>
+                <Button variant="primary" className="mt-4" onClick={() => navigate('/roles/new')}>
+                  + Create Role
+                </Button>
+              </div>
+            </Card>
+          }
+        />
       </div>
 
       {/* Delete Modal */}
