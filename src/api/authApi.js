@@ -1,6 +1,6 @@
 /**
  * Authentication API Module
- * Handles login, logout, and profile operations
+ * Handles login, logout, refresh, and profile operations
  */
 
 import api from './api';
@@ -10,25 +10,32 @@ const { AUTH, ORGANIZATIONS } = API_ENDPOINTS;
 
 /**
  * Check if API response is successful
- * Your backend uses: { data: {...}, result: { responseCode: 200 }, errorFields: null }
  */
 const isSuccess = (response) => {
-  return response?.result?.responseCode === 200 || response?.success === true;
+  const code = response?.result?.responseCode;
+  return code === 200 || code === 201 || response?.success === true;
+};
+
+/**
+ * Store tokens in localStorage
+ */
+const storeTokens = (accessToken, refreshToken) => {
+  if (accessToken) {
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+  }
+  if (refreshToken) {
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+  }
 };
 
 /**
  * Staff login (Admin Portal)
- * @param {Object} credentials - Login credentials
- * @param {string} credentials.email - User email
- * @param {string} credentials.password - User password
- * @returns {Promise} Response with access token
  */
 export const login = async (credentials) => {
   const response = await api.post(AUTH.LOGIN, credentials);
-  console.log('Login response:', response); // Debug log
   
   if (isSuccess(response) && response.data?.accessToken) {
-    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken);
+    storeTokens(response.data.accessToken, response.data.refreshToken);
     return { success: true, data: response.data };
   }
   
@@ -40,18 +47,12 @@ export const login = async (credentials) => {
 
 /**
  * Examinee login (Student Portal)
- * @param {Object} credentials - Login credentials
- * @param {number} credentials.organizationId - Organization ID
- * @param {string} credentials.email - User email
- * @param {string} credentials.password - User password
- * @returns {Promise} Response with access token
  */
 export const loginExaminee = async (credentials) => {
   const response = await api.post(AUTH.LOGIN_EXAMINEE, credentials);
-  console.log('Examinee login response:', response); // Debug log
   
   if (isSuccess(response) && response.data?.accessToken) {
-    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken);
+    storeTokens(response.data.accessToken, response.data.refreshToken);
     return { success: true, data: response.data };
   }
   
@@ -62,10 +63,59 @@ export const loginExaminee = async (credentials) => {
 };
 
 /**
+ * Refresh access token using refresh token (staff)
+ */
+export const refreshToken = async () => {
+  const storedRefreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+  if (!storedRefreshToken) {
+    return { success: false, message: 'No refresh token' };
+  }
+
+  try {
+    const response = await api.post(AUTH.REFRESH, { refreshToken: storedRefreshToken });
+    
+    if (isSuccess(response) && response.data?.accessToken) {
+      storeTokens(response.data.accessToken, response.data.refreshToken);
+      return { success: true, data: response.data };
+    }
+    
+    return { success: false, message: 'Token refresh failed' };
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    return { success: false, message: error.message };
+  }
+};
+
+/**
+ * Refresh access token using refresh token (examinee)
+ */
+export const refreshExamineeToken = async () => {
+  const storedRefreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+  if (!storedRefreshToken) {
+    return { success: false, message: 'No refresh token' };
+  }
+
+  try {
+    const response = await api.post(AUTH.REFRESH_EXAMINEE, { refreshToken: storedRefreshToken });
+    
+    if (isSuccess(response) && response.data?.accessToken) {
+      storeTokens(response.data.accessToken, response.data.refreshToken);
+      return { success: true, data: response.data };
+    }
+    
+    return { success: false, message: 'Token refresh failed' };
+  } catch (error) {
+    console.error('Token refresh error:', error);
+    return { success: false, message: error.message };
+  }
+};
+
+/**
  * Logout - Clear stored auth data
  */
 export const logout = () => {
   localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.USER_DATA);
   localStorage.removeItem(STORAGE_KEYS.ORGANIZATION);
   window.location.href = '/login';
@@ -73,7 +123,6 @@ export const logout = () => {
 
 /**
  * Get current user profile
- * @returns {Promise} Response with user profile data
  */
 export const getProfile = async () => {
   try {
@@ -90,8 +139,6 @@ export const getProfile = async () => {
 
 /**
  * Resolve organization by domain/origin
- * @param {string} origin - Domain origin (e.g., academy.example.com)
- * @returns {Promise} Response with organization data
  */
 export const resolveOrganization = async (origin) => {
   try {
@@ -107,8 +154,6 @@ export const resolveOrganization = async (origin) => {
 
 /**
  * Decode JWT token to extract user info
- * @param {string} token - JWT token
- * @returns {Object|null} Decoded token payload
  */
 export const decodeToken = (token) => {
   try {
@@ -129,26 +174,30 @@ export const decodeToken = (token) => {
 
 /**
  * Check if token is expired
- * @param {string} token - JWT token
- * @returns {boolean} True if expired
  */
 export const isTokenExpired = (token) => {
   const decoded = decodeToken(token);
   if (!decoded || !decoded.exp) return true;
-  return decoded.exp * 1000 < Date.now();
+  // Add 30 second buffer to refresh before actual expiry
+  return decoded.exp * 1000 < Date.now() + 30000;
 };
 
 /**
  * Get stored access token
- * @returns {string|null} Access token
  */
 export const getStoredToken = () => {
   return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 };
 
 /**
+ * Get stored refresh token
+ */
+export const getStoredRefreshToken = () => {
+  return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+};
+
+/**
  * Check if user is authenticated
- * @returns {boolean} True if authenticated
  */
 export const isAuthenticated = () => {
   const token = getStoredToken();
@@ -159,10 +208,13 @@ export default {
   login,
   loginExaminee,
   logout,
+  refreshToken,
+  refreshExamineeToken,
   getProfile,
   resolveOrganization,
   decodeToken,
   isTokenExpired,
   getStoredToken,
+  getStoredRefreshToken,
   isAuthenticated,
 };

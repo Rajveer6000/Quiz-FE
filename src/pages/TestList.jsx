@@ -1,23 +1,37 @@
 /**
- * TestList Page
- * Test/Quiz management with list view
+ * Quiz List Page
+ * Quiz management with card-based view - Tailwind only
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button, Badge, Modal, Table, PageHeader } from '../components/common';
+import { Button, Modal, PageHeader } from '../components/common';
 import { listTests, deleteTest, finalizeTest } from '../api';
-import { FileText, Plus, Pencil, Trash2, Lock, Eye } from 'lucide-react';
+import {
+  BookOpen,
+  Plus,
+  Pencil,
+  Trash2,
+  Lock,
+  Eye,
+  Clock,
+  HelpCircle,
+  Users,
+  Calendar,
+  MoreVertical,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
 
-const TestList = () => {
+const QuizList = () => {
   const navigate = useNavigate();
-  const [tests, setTests] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 0, pageSize: 10, total: 0 });
-  const [deleteModal, setDeleteModal] = useState({ open: false, test: null });
-  const [finalizeModal, setFinalizeModal] = useState({ open: false, test: null });
+  const [pagination, setPagination] = useState({ page: 0, pageSize: 12, total: 0 });
+  const [deleteModal, setDeleteModal] = useState({ open: false, quiz: null });
+  const [finalizeModal, setFinalizeModal] = useState({ open: false, quiz: null });
 
-  const fetchTests = async () => {
+  const fetchQuizzes = async () => {
     setLoading(true);
     try {
       const response = await listTests({
@@ -25,207 +39,220 @@ const TestList = () => {
         pageSize: pagination.pageSize,
       });
       if (response.success) {
-        setTests(response.data.list || []);
+        setQuizzes(response.data.list || []);
         setPagination(prev => ({ ...prev, total: response.data.totalRecords }));
       }
     } catch (error) {
-      console.error('Failed to fetch tests:', error);
+      console.error('Failed to fetch quizzes:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTests();
+    fetchQuizzes();
   }, [pagination.page]);
 
   const handleDelete = async () => {
-    if (!deleteModal.test) return;
+    if (!deleteModal.quiz) return;
     try {
-      await deleteTest(deleteModal.test.id);
-      setDeleteModal({ open: false, test: null });
-      fetchTests();
+      await deleteTest(deleteModal.quiz.id);
+      setDeleteModal({ open: false, quiz: null });
+      fetchQuizzes();
     } catch (error) {
-      console.error('Failed to delete test:', error);
+      console.error('Failed to delete quiz:', error);
     }
   };
 
   const handleFinalize = async () => {
-    if (!finalizeModal.test) return;
+    if (!finalizeModal.quiz) return;
     try {
-      await finalizeTest(finalizeModal.test.id);
-      setFinalizeModal({ open: false, test: null });
-      fetchTests();
+      await finalizeTest(finalizeModal.quiz.id);
+      setFinalizeModal({ open: false, quiz: null });
+      fetchQuizzes();
     } catch (error) {
-      console.error('Failed to finalize test:', error);
+      console.error('Failed to finalize quiz:', error);
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const columns = [
-    {
-      key: 'name',
-      title: 'Test',
-      className: 'max-w-xl',
-      render: (test) => (
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <p className="text-white font-semibold">{test.name}</p>
-            <Badge variant={test.isFinal ? 'success' : 'warning'} dot>
-              {test.isFinal ? 'Finalized' : 'Draft'}
-            </Badge>
-          </div>
-          {test.description && (
-            <p className="table-meta line-clamp-1">{test.description}</p>
+  const QuizCard = ({ quiz }) => {
+    return (
+      <div className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:border-white/20 hover:bg-slate-800/70 transition-all duration-300 overflow-hidden">
+        {/* Status Badge */}
+        <div className="absolute top-4 right-4 z-10">
+          {quiz.isFinal ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
+              <CheckCircle className="w-3 h-3" />
+              Live
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
+              <AlertCircle className="w-3 h-3" />
+              Draft
+            </span>
           )}
         </div>
-      ),
-    },
-    {
-      key: 'questions',
-      title: 'Questions',
-      render: (test) => (
-        <div className="space-y-1">
-          <p className="text-white font-semibold">{test.totalQuestions || 0}</p>
-          <p className="text-xs text-slate-400">{test.totalMarks || 0} marks</p>
+
+        {/* Quiz Info */}
+        <div className="pr-20 min-w-0">
+          <h3
+            className="text-lg font-semibold text-white truncate capitalize"
+            title={quiz.name}
+          >
+            {quiz.name}
+          </h3>
+          {quiz.description ? (
+            <p
+              className="text-sm text-gray-400 mt-1 line-clamp-2 break-words"
+              title={quiz.description}
+            >
+              {quiz.description}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500 mt-1 italic">No description</p>
+          )}
         </div>
-      ),
-    },
-    {
-      key: 'duration',
-      title: 'Duration',
-      render: (test) => (
-        <div className="space-y-1">
-          <p className="text-white font-semibold">{test.durationMin || 0} mins</p>
-          <p className="text-xs text-slate-400">{test.price > 0 ? `₹${test.price}` : 'Free'}</p>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-white/5">
+          <div className="text-center min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 mx-auto rounded-xl bg-blue-500/10">
+              <HelpCircle className="w-5 h-5 text-blue-400" />
+            </div>
+            <p className="text-lg font-bold text-white mt-2 truncate">{quiz.totalQuestions || 0}</p>
+            <p className="text-xs text-gray-500 truncate">Questions</p>
+          </div>
+          <div className="text-center min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 mx-auto rounded-xl bg-violet-500/10">
+              <Clock className="w-5 h-5 text-violet-400" />
+            </div>
+            <p className="text-lg font-bold text-white mt-2 truncate">{quiz.durationMin || 0}</p>
+            <p className="text-xs text-gray-500 truncate">Minutes</p>
+          </div>
+          <div className="text-center min-w-0">
+            <div className="flex items-center justify-center w-10 h-10 mx-auto rounded-xl bg-emerald-500/10">
+              <BookOpen className="w-5 h-5 text-emerald-400" />
+            </div>
+            <p className="text-lg font-bold text-white mt-2 truncate">{quiz.totalMarks || 0}</p>
+            <p className="text-xs text-gray-500 truncate">Marks</p>
+          </div>
         </div>
-      ),
-    },
-    {
-      key: 'window',
-      title: 'Window',
-      render: (test) => (
-        <div className="space-y-1">
-          <p className="text-white font-semibold">
-            {test.startTime ? formatDate(test.startTime) : 'Not scheduled'}
-          </p>
-          <p className="text-xs text-slate-400">
-            {test.endTime ? `Ends ${formatDate(test.endTime)}` : '—'}
-          </p>
-        </div>
-      ),
-    },
-    {
-      key: 'actions',
-      title: 'Actions',
-      align: 'right',
-      render: (test) => (
-        <div className="flex justify-end gap-2">
-          {!test.isFinal ? (
+
+        {/* Actions */}
+        <div className="flex gap-2 mt-5 pt-5 border-t border-white/5">
+          {!quiz.isFinal ? (
             <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(`/tests/${test.id}/edit`)}
+              <button
+                onClick={() => navigate(`/tests/${quiz.id}/edit`)}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
               >
+                <Pencil className="w-4 h-4" />
                 Edit
-              </Button>
-              <Button
-                variant="accent"
-                size="sm"
-                onClick={() => setFinalizeModal({ open: true, test })}
+              </button>
+              <button
+                onClick={() => setFinalizeModal({ open: true, quiz })}
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-500/20 text-violet-400 hover:bg-violet-500/30 transition-all text-sm font-medium"
               >
-                Finalize
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-danger-400 hover:text-danger-300"
-                onClick={() => setDeleteModal({ open: true, test })}
+                <Lock className="w-4 h-4" />
+                Publish
+              </button>
+              <button
+                onClick={() => setDeleteModal({ open: true, quiz })}
+                className="flex items-center justify-center w-10 py-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
               >
-                Delete
-              </Button>
+                <Trash2 className="w-4 h-4" />
+              </button>
             </>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(`/tests/${test.id}`)}
+            <button
+              onClick={() => navigate(`/tests/${quiz.id}`)}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
             >
-              View
-            </Button>
+              <Eye className="w-4 h-4" />
+              View Details
+            </button>
           )}
         </div>
-      ),
-    },
-  ];
+      </div>
+    );
+  };
 
   return (
     <div>
       <PageHeader
-        icon={<FileText className="w-5 h-5" />}
-        title="Tests"
-        subtitle="Manage your tests and quizzes"
+        icon={<BookOpen className="w-5 h-5" />}
+        title="Quizzes"
+        subtitle="Create and manage your quizzes"
         actions={
           <Button variant="primary" onClick={() => navigate('/tests/new')}>
             <Plus className="w-4 h-4" />
-            Create Test
+            Create Quiz
           </Button>
         }
       />
 
       <div className="space-y-6">
-        <Table
-          columns={columns}
-          data={tests}
-          rowKey="id"
-          isLoading={loading}
-          emptyState={
-            <Card className="text-center py-12 w-full">
-              <div className="text-gray-500">
-                <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-                <p className="text-lg">No tests found</p>
-                <p className="text-sm mt-1">Create your first test to get started</p>
-                <Button variant="primary" className="mt-4" onClick={() => navigate('/tests/new')}>
-                  + Create Test
-                </Button>
+        {/* Loading State */}
+        {loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-slate-800/50 border border-white/10 rounded-2xl p-5 animate-pulse">
+                <div className="h-6 bg-slate-700 rounded w-3/4 mb-3" />
+                <div className="h-4 bg-slate-700 rounded w-1/2 mb-6" />
+                <div className="grid grid-cols-3 gap-4 pt-5 border-t border-white/5">
+                  <div className="h-20 bg-slate-700 rounded-xl" />
+                  <div className="h-20 bg-slate-700 rounded-xl" />
+                  <div className="h-20 bg-slate-700 rounded-xl" />
+                </div>
               </div>
-            </Card>
-          }
-        />
+            ))}
+          </div>
+        )}
+
+        {/* Quiz Grid */}
+        {!loading && quizzes.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {quizzes.map((quiz) => (
+              <QuizCard key={quiz.id} quiz={quiz} />
+            ))}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && quizzes.length === 0 && (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-800/50 flex items-center justify-center">
+              <BookOpen className="w-10 h-10 text-gray-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No quizzes yet</h3>
+            <p className="text-gray-400 mb-6">Create your first quiz to get started</p>
+            <Button variant="primary" onClick={() => navigate('/tests/new')}>
+              <Plus className="w-4 h-4" />
+              Create Quiz
+            </Button>
+          </div>
+        )}
 
         {/* Pagination */}
         {pagination.total > pagination.pageSize && (
-          <div className="flex justify-center gap-2">
-            <Button
-              variant="ghost"
+          <div className="flex justify-center gap-4 pt-6">
+            <button
               disabled={pagination.page === 0}
               onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+              className="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
-            </Button>
+            </button>
             <span className="flex items-center px-4 text-gray-400">
               Page {pagination.page + 1} of {Math.ceil(pagination.total / pagination.pageSize)}
             </span>
-            <Button
-              variant="ghost"
+            <button
               disabled={(pagination.page + 1) * pagination.pageSize >= pagination.total}
               onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+              className="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
-            </Button>
+            </button>
           </div>
         )}
       </div>
@@ -233,11 +260,11 @@ const TestList = () => {
       {/* Delete Modal */}
       <Modal
         isOpen={deleteModal.open}
-        onClose={() => setDeleteModal({ open: false, test: null })}
-        title="Delete Test"
+        onClose={() => setDeleteModal({ open: false, quiz: null })}
+        title="Delete Quiz"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setDeleteModal({ open: false, test: null })}>
+            <Button variant="ghost" onClick={() => setDeleteModal({ open: false, quiz: null })}>
               Cancel
             </Button>
             <Button variant="danger" onClick={handleDelete}>
@@ -246,33 +273,33 @@ const TestList = () => {
           </>
         }
       >
-        <p>Are you sure you want to delete "{deleteModal.test?.name}"?</p>
+        <p>Are you sure you want to delete "{deleteModal.quiz?.name}"?</p>
         <p className="text-sm text-gray-400 mt-2">This action cannot be undone.</p>
       </Modal>
 
       {/* Finalize Modal */}
       <Modal
         isOpen={finalizeModal.open}
-        onClose={() => setFinalizeModal({ open: false, test: null })}
-        title="Finalize Test"
+        onClose={() => setFinalizeModal({ open: false, quiz: null })}
+        title="Publish Quiz"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setFinalizeModal({ open: false, test: null })}>
+            <Button variant="ghost" onClick={() => setFinalizeModal({ open: false, quiz: null })}>
               Cancel
             </Button>
             <Button variant="accent" onClick={handleFinalize}>
-              Finalize
+              Publish
             </Button>
           </>
         }
       >
-        <p>Are you sure you want to finalize "{finalizeModal.test?.name}"?</p>
-        <p className="text-sm text-warning-400 mt-2">
-          ⚠️ Once finalized, the test cannot be edited or deleted.
+        <p>Are you sure you want to publish "{finalizeModal.quiz?.name}"?</p>
+        <p className="text-sm text-amber-400 mt-2">
+          ⚠️ Once published, the quiz cannot be edited or deleted.
         </p>
       </Modal>
     </div>
   );
 };
 
-export default TestList;
+export default QuizList;
