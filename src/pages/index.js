@@ -16,9 +16,10 @@ export { default as Profile } from './Profile';
 export { default as QuestionList } from './QuestionList';
 export { default as QuestionForm } from './QuestionForm';
 
-// Staff pages - Tests
+// Staff pages - Tests/Quizzes
 export { default as TestList } from './TestList';
 export { default as TestForm } from './TestForm';
+export { default as QuizWizard } from './QuizWizard';
 export { default as TestQuestions } from './TestQuestions';
 
 // Staff pages - Users

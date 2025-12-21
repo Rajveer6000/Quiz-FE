@@ -37,8 +37,10 @@ const TestForm = () => {
   const fetchTest = async () => {
     try {
       const response = await getTest(id);
+        console.log('TestForm - getTest response:', response);
       if (response.success) {
         const test = response.data;
+        console.log('TestForm - sections:', test.sections);
         setFormData({
           name: test.name || '',
           description: test.description || '',
@@ -244,6 +246,7 @@ const TestForm = () => {
                         {section.subjectName || 'General'}
                       </Badge>
                       <Button
+                        type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => navigate(`/tests/${id}/sections/${section.id}/questions`)}

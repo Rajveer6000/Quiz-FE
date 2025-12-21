@@ -27,7 +27,7 @@ const QuizList = () => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ page: 0, pageSize: 12, total: 0 });
+  const [pagination, setPagination] = useState({ page: 0, pageSize: 10, total: 0 });
   const [deleteModal, setDeleteModal] = useState({ open: false, quiz: null });
   const [finalizeModal, setFinalizeModal] = useState({ open: false, quiz: null });
 
