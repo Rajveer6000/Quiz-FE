@@ -13,6 +13,8 @@ export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: '/login',
     LOGIN_EXAMINEE: '/login/examinee',
+    REFRESH: '/login/refresh',
+    REFRESH_EXAMINEE: '/login/examinee/refresh',
     PROFILE: '/profile',
   },
 
@@ -224,6 +226,7 @@ export const PAGINATION = {
 // =============================================================================
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'quiz_auth_token',
+  REFRESH_TOKEN: 'quiz_refresh_token',
   USER_DATA: 'quiz_user_data',
   ORGANIZATION: 'quiz_organization',
   THEME: 'quiz_theme',

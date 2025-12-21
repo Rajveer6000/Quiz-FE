@@ -12,7 +12,8 @@ const { TESTS } = API_ENDPOINTS;
  * Check if API response is successful
  */
 const isSuccess = (response) => {
-  return response?.result?.responseCode === 200 || response?.success === true;
+  const code = response?.result?.responseCode;
+  return code === 200 || code === 201 || response?.success === true;
 };
 
 /**
@@ -110,6 +111,38 @@ export const finalizeTest = async (testId) => {
   return normalizeResponse(response);
 };
 
+/**
+ * Get test types (JEE, NEET, etc.)
+ * @param {Object} [params] - Query parameters
+ * @returns {Promise} Response with test types list
+ */
+export const getTestTypes = async (params = {}) => {
+  const response = await api.get('/test-types/types', { params });
+  return normalizeResponse(response);
+};
+
+/**
+ * Get templates by test type
+ * @param {number} typeId - Test type ID
+ * @param {Object} [params] - Query parameters
+ * @returns {Promise} Response with templates list
+ */
+export const getTemplatesByType = async (typeId, params = {}) => {
+  const response = await api.get(`/test-types/${typeId}/templates`, { params });
+  return normalizeResponse(response);
+};
+
+/**
+ * Get template sections
+ * @param {number} templateId - Template ID
+ * @param {Object} [params] - Query parameters
+ * @returns {Promise} Response with template sections
+ */
+export const getTemplateSections = async (templateId, params = {}) => {
+  const response = await api.get(`/test-templates/${templateId}/sections`, { params });
+  return normalizeResponse(response);
+};
+
 export default {
   listTests,
   createTest,
@@ -118,4 +151,7 @@ export default {
   deleteTest,
   addQuestionToTest,
   finalizeTest,
+  getTestTypes,
+  getTemplatesByType,
+  getTemplateSections,
 };
