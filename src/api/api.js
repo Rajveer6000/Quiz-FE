@@ -1,10 +1,10 @@
 /**
  * Axios API Instance
- * Configured with base URL and authentication interceptors
+ * Configured with base URL, authentication interceptors, and auto token refresh
  */
 
 import axios from 'axios';
-import { API_BASE_URL, STORAGE_KEYS } from '../constants/constants';
+import { API_BASE_URL, STORAGE_KEYS, API_ENDPOINTS } from '../constants/constants';
 import { getLoadingCallbacks } from '../context/LoadingContext';
 
 // Create axios instance with default config
@@ -15,6 +15,20 @@ const api = axios.create({
   },
   timeout: 30000, // 30 seconds
 });
+
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // Request interceptor - Add auth token and trigger loading
 api.interceptors.request.use(
@@ -34,38 +48,105 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor - Handle common errors and stop loading
+// Response interceptor - Handle errors, auto refresh, and stop loading
 api.interceptors.response.use(
   (response) => {
     getLoadingCallbacks().stop();
     return response.data;
   },
-  (error) => {
+  async (error) => {
     getLoadingCallbacks().stop();
     
-    // Handle specific error cases
+    const originalRequest = error.config;
+    
+    // Handle 401 - Try to refresh token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't retry refresh endpoints
+      if (originalRequest.url?.includes('/refresh')) {
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        // Queue the request while refresh is in progress
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }).catch(err => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshTokenValue = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+      
+      if (!refreshTokenValue) {
+        isRefreshing = false;
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      try {
+        // Determine which refresh endpoint to use
+        const userData = localStorage.getItem(STORAGE_KEYS.USER_DATA);
+        const isExaminee = userData && JSON.parse(userData)?.isExaminee;
+        const refreshEndpoint = isExaminee 
+          ? API_ENDPOINTS.AUTH.REFRESH_EXAMINEE 
+          : API_ENDPOINTS.AUTH.REFRESH;
+
+        const response = await axios.post(
+          `${API_BASE_URL}${refreshEndpoint}`,
+          { refreshToken: refreshTokenValue },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        const { accessToken, refreshToken } = response.data?.data || {};
+        
+        if (accessToken) {
+          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+          if (refreshToken) {
+            localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+          }
+          
+          processQueue(null, accessToken);
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // Handle other error cases
     if (error.response) {
       const { status, data } = error.response;
 
       switch (status) {
-        case 401:
-          // Unauthorized - clear token and redirect to login
-          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-          localStorage.removeItem(STORAGE_KEYS.USER_DATA);
-          window.location.href = '/login';
-          break;
         case 403:
-          // Forbidden
-          console.error('Access denied:', data.message);
+          console.error('Access denied:', data?.message);
           break;
         case 404:
-          console.error('Resource not found:', data.message);
+          console.error('Resource not found:', data?.message);
           break;
         case 500:
-          console.error('Server error:', data.message);
+          console.error('Server error:', data?.message);
           break;
         default:
-          console.error('API Error:', data.message || error.message);
+          console.error('API Error:', data?.message || error.message);
       }
 
       return Promise.reject(data || error);

@@ -14,7 +14,8 @@ import {
   ClipboardList,
   User,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  BookOpen
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -48,8 +49,8 @@ const Sidebar = () => {
     },
     {
       path: '/tests',
-      icon: ClipboardList,
-      label: 'Tests',
+      icon: BookOpen,
+      label: 'Quizzes',
       visible: canRead(MODULES.QUIZZES)
     },
     // {

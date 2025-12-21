@@ -21,6 +21,7 @@ import {
   // Staff - Tests
   TestList,
   TestForm,
+  QuizWizard,
   TestQuestions,
   // Staff - Users
   UserList,
@@ -96,9 +97,9 @@ function App() {
                 <Route path="/questions/new" element={<QuestionForm />} />
                 <Route path="/questions/:id/edit" element={<QuestionForm />} />
 
-                {/* Tests */}
+                {/* Tests/Quizzes */}
                 <Route path="/tests" element={<TestList />} />
-                <Route path="/tests/new" element={<TestForm />} />
+                <Route path="/tests/new" element={<QuizWizard />} />
                 <Route path="/tests/:testId" element={<TestForm />} />
                 <Route path="/tests/:testId/edit" element={<TestForm />} />
                 <Route path="/tests/:testId/sections/:sectionId/questions" element={<TestQuestions />} />
