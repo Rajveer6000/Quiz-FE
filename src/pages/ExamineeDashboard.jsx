@@ -3,8 +3,7 @@
  * Dashboard for students/examinees
  */
 
-import { Card } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, PageHeader } from '../components/common';
 import { useAuth } from '../context';
 
 const ExamineeDashboard = () => {
@@ -12,9 +11,13 @@ const ExamineeDashboard = () => {
 
   return (
     <div>
-      <Header title="Student Dashboard" />
+      <PageHeader
+        icon="S"
+        title="Student Dashboard"
+        subtitle="Welcome to your learning portal"
+      />
 
-      <div className="space-y-6 mt-6">
+      <div className="space-y-6">
         {/* Welcome Card */}
         <Card className="bg-gradient-to-r from-primary-600/20 to-accent-600/20 border-primary-500/30">
           <div className="flex items-center justify-between">

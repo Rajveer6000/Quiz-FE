@@ -12,7 +12,8 @@ const { EXAMINEES } = API_ENDPOINTS;
  * Check if API response is successful
  */
 const isSuccess = (response) => {
-  return response?.result?.responseCode === 200 || response?.success === true;
+  const code = response?.result?.responseCode;
+  return code === 200 || code === 201 || response?.success === true;
 };
 
 /**
@@ -29,10 +30,11 @@ const normalizeResponse = (response) => {
 };
 
 /**
- * List examinees with pagination
+ * List examinees with pagination and search
  * @param {Object} [params] - Query parameters
  * @param {number} [params.pageNo=0] - Page number
  * @param {number} [params.pageSize=10] - Page size
+ * @param {string} [params.searchTerm] - Search term for filtering by name
  * @returns {Promise} Response with paginated examinee list
  */
 export const listExaminees = async (params = {}) => {

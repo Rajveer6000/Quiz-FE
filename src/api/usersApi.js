@@ -29,10 +29,11 @@ const normalizeResponse = (response) => {
 };
 
 /**
- * List users with pagination
+ * List users with pagination and search
  * @param {Object} [params] - Query parameters
  * @param {number} [params.pageNo=0] - Page number
  * @param {number} [params.pageSize=10] - Page size
+ * @param {string} [params.searchTerm] - Search term for filtering by name
  * @returns {Promise} Response with paginated user list
  */
 export const listUsers = async (params = {}) => {
