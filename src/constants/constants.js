@@ -1,7 +1,3 @@
-/**
- * Quiz Application Constants
- * Central configuration file for API endpoints, status codes, and mappings
- */
 
 // =============================================================================
 // API BASE URL
