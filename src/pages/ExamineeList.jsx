@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Table, PageHeader } from '../components/common';
 import { listExaminees } from '../api/examineesApi';
 import { USER_STATUS } from '../constants/constants';
+import { GraduationCap, UserPlus, Eye } from 'lucide-react';
 
 const ExamineeList = () => {
   const navigate = useNavigate();
@@ -124,14 +125,15 @@ const ExamineeList = () => {
   return (
     <div>
       <PageHeader
-        icon="E"
+        icon={<GraduationCap className="w-5 h-5" />}
         title="Examinees"
         subtitle="Manage and monitor your examinees at a glance"
         searchValue={searchTerm}
         onSearchChange={handleSearchChange}
         actions={
           <Button variant="primary" onClick={() => navigate('/examinees/invite')}>
-            + Invite Examinee
+            <UserPlus className="w-4 h-4" />
+            Invite Examinee
           </Button>
         }
       />

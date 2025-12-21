@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Table, PageHeader } from '../components/common';
 import { listRoles, deleteRole } from '../api/rolesApi';
+import { Shield, Plus, Pencil, Trash2 } from 'lucide-react';
 
 const RoleList = () => {
   const navigate = useNavigate();
@@ -105,12 +106,13 @@ const RoleList = () => {
   return (
     <div>
       <PageHeader
-        icon="R"
+        icon={<Shield className="w-5 h-5" />}
         title="Roles"
         subtitle="Manage user roles and permissions"
         actions={
           <Button variant="primary" onClick={() => navigate('/roles/new')}>
-            + Create Role
+            <Plus className="w-4 h-4" />
+            Create Role
           </Button>
         }
       />

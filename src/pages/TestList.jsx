@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Table, PageHeader } from '../components/common';
 import { listTests, deleteTest, finalizeTest } from '../api';
+import { FileText, Plus, Pencil, Trash2, Lock, Eye } from 'lucide-react';
 
 const TestList = () => {
   const navigate = useNavigate();
@@ -172,12 +173,13 @@ const TestList = () => {
   return (
     <div>
       <PageHeader
-        icon="T"
+        icon={<FileText className="w-5 h-5" />}
         title="Tests"
         subtitle="Manage your tests and quizzes"
         actions={
           <Button variant="primary" onClick={() => navigate('/tests/new')}>
-            + Create Test
+            <Plus className="w-4 h-4" />
+            Create Test
           </Button>
         }
       />

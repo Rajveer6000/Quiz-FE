@@ -38,9 +38,9 @@ const RoleForm = () => {
     try {
       const response = await getOrganizationModules();
       if (response.success) {
-        // Filter out 'examinee' module and sort by id
+        // Filter out 'examinee' and 'modules' modules and sort by id
         const modules = (response.data.modules || [])
-          .filter(m => m.moduleSlug !== 'examinee')
+          .filter(m => m.moduleSlug !== 'examinee' && m.moduleSlug !== 'modules')
           .sort((a, b) => parseInt(a.id) - parseInt(b.id));
         
         setModuleList(modules);

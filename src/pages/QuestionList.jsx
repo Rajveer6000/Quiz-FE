@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Card, Button, Badge, Input, Modal, Table, PageHeader } from '../components/common';
 import { listQuestions, deleteQuestion } from '../api';
 import { QUESTION_TYPE_LABELS, DIFFICULTY_LABELS } from '../constants/constants';
+import { HelpCircle, Plus, Pencil, Trash2, Filter } from 'lucide-react';
 
 const QuestionList = () => {
   const [questions, setQuestions] = useState([]);
@@ -139,12 +140,13 @@ const QuestionList = () => {
   return (
     <div>
       <PageHeader
-        icon="Q"
+        icon={<HelpCircle className="w-5 h-5" />}
         title="Question Bank"
         subtitle="Manage your questions"
         actions={
           <Button variant="primary" onClick={() => window.location.href = '/questions/new'}>
-            + Add Question
+            <Plus className="w-4 h-4" />
+            Add Question
           </Button>
         }
       />

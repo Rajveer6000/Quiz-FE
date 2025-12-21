@@ -12,7 +12,8 @@ const { EXAMINEES } = API_ENDPOINTS;
  * Check if API response is successful
  */
 const isSuccess = (response) => {
-  return response?.result?.responseCode === 200 || response?.success === true;
+  const code = response?.result?.responseCode;
+  return code === 200 || code === 201 || response?.success === true;
 };
 
 /**

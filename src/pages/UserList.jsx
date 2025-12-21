@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Table, PageHeader } from '../components/common';
 import { listUsers, deleteUser } from '../api/usersApi';
 import { ROLE_NAMES, USER_STATUS } from '../constants/constants';
+import { UserPlus, Users, Pencil, Trash2 } from 'lucide-react';
 
 const UserList = () => {
   const navigate = useNavigate();
@@ -154,14 +155,15 @@ const UserList = () => {
   return (
     <div>
       <PageHeader
-        icon="U"
+        icon={<Users className="w-5 h-5" />}
         title="Users"
         subtitle="Manage and monitor your staff at a glance"
         searchValue={searchTerm}
         onSearchChange={handleSearchChange}
         actions={
           <Button variant="primary" onClick={() => navigate('/users/new')}>
-            + Add User
+            <UserPlus className="w-4 h-4" />
+            Add User
           </Button>
         }
       />
