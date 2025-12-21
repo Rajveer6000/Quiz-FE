@@ -3,16 +3,34 @@
  * Overview with stats and quick actions
  */
 
-import { Card, Button, Badge } from '../components/common';
-import { Header } from '../components/layout';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, Button, Badge, PageHeader } from '../components/common';
+import { generateInvitation } from '../api/examineesApi';
+import { useToast } from '../context';
+import {
+  LayoutDashboard,
+  FileText,
+  HelpCircle,
+  CheckCircle,
+  Clock,
+  Plus,
+  ClipboardList,
+  BarChart3,
+  UserPlus
+} from 'lucide-react';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [generating, setGenerating] = useState(false);
+  const { toast } = useToast();
+
   // Mock data - would come from API in real app
   const stats = [
-    { label: 'Total Tests', value: '12', icon: '📝', change: '+3 this week', color: 'primary' },
-    { label: 'Questions Bank', value: '450', icon: '❓', change: '+25 new', color: 'accent' },
-    { label: 'Completed Tests', value: '8', icon: '✅', change: '75% pass rate', color: 'success' },
-    { label: 'Pending Reviews', value: '3', icon: '⏳', change: '2 due today', color: 'warning' },
+    { label: 'Total Tests', value: '12', icon: FileText, change: '+3 this week', color: 'primary' },
+    { label: 'Questions Bank', value: '450', icon: HelpCircle, change: '+25 new', color: 'accent' },
+    { label: 'Completed Tests', value: '8', icon: CheckCircle, change: '75% pass rate', color: 'success' },
+    { label: 'Pending Reviews', value: '3', icon: Clock, change: '2 due today', color: 'warning' },
   ];
 
   const recentTests = [
@@ -21,25 +39,58 @@ const Dashboard = () => {
     { id: 3, name: 'Chemistry Full Test', date: '2025-12-15', score: '42%', status: 'failed' },
   ];
 
+  const handleGenerateAndCopyInvite = async () => {
+    if (generating) return;
+
+    setGenerating(true);
+    try {
+      const response = await generateInvitation({});
+      if (response.success) {
+        const token = response.data.token;
+        const link = `${window.location.origin}/register/examinee?t=${token}`;
+
+        // Copy to clipboard
+        await navigator.clipboard.writeText(link);
+        toast.success('Invitation link generated and copied!');
+      } else {
+        toast.error('Failed to generate invitation link');
+      }
+    } catch (error) {
+      console.error('Failed to generate invitation:', error);
+      toast.error('Failed to generate invitation link');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
     <div>
-      <Header title="Dashboard" />
-      
-      <div className="space-y-6 mt-6">
+      <PageHeader
+        icon={<LayoutDashboard className="w-5 h-5" />}
+        title="Dashboard"
+        subtitle="Overview of your quiz platform"
+      />
+
+      <div className="space-y-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, index) => (
-            <Card key={index} hover className="cursor-pointer">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">{stat.label}</p>
-                  <p className="text-3xl font-bold text-white mt-1">{stat.value}</p>
-                  <p className="text-xs text-gray-500 mt-2">{stat.change}</p>
+          {stats.map((stat, index) => {
+            const IconComp = stat.icon;
+            return (
+              <Card key={index} hover className="cursor-pointer">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">{stat.label}</p>
+                    <p className="text-3xl font-bold text-white mt-1">{stat.value}</p>
+                    <p className="text-xs text-gray-500 mt-2">{stat.change}</p>
+                  </div>
+                  <div className={`w-12 h-12 rounded-xl bg-${stat.color}-500/20 flex items-center justify-center`}>
+                    <IconComp className={`w-6 h-6 text-${stat.color}-400`} />
+                  </div>
                 </div>
-                <span className="text-3xl">{stat.icon}</span>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
 
         {/* Quick Actions */}
@@ -49,10 +100,26 @@ const Dashboard = () => {
           </Card.Header>
           <Card.Content>
             <div className="flex flex-wrap gap-3">
-              <Button variant="primary">+ Create New Test</Button>
-              <Button variant="accent">+ Add Questions</Button>
-              <Button variant="outline">Take a Practice Test</Button>
-              <Button variant="ghost">View All Reports</Button>
+              <Button variant="primary" onClick={() => navigate('/tests/new')}>
+                <Plus className="w-4 h-4" />
+                Create Test
+              </Button>
+              <Button variant="accent" onClick={() => navigate('/questions/new')}>
+                <Plus className="w-4 h-4" />
+                Add Question
+              </Button>
+              <Button variant="success" onClick={handleGenerateAndCopyInvite} isLoading={generating}>
+                <UserPlus className="w-4 h-4" />
+                Invite Students
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/take-test')}>
+                <ClipboardList className="w-4 h-4" />
+                Take Practice Test
+              </Button>
+              <Button variant="ghost" onClick={() => navigate('/history')}>
+                <BarChart3 className="w-4 h-4" />
+                View Reports
+              </Button>
             </div>
           </Card.Content>
         </Card>
@@ -95,9 +162,7 @@ const Dashboard = () => {
             <Card.Content>
               <div className="aspect-video flex items-center justify-center bg-dark-800/50 rounded-xl">
                 <div className="text-center text-gray-500">
-                  <svg className="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                  <BarChart3 className="w-16 h-16 mx-auto mb-3 opacity-50" />
                   <p>Chart will appear here</p>
                   <p className="text-sm">Connect to backend for real data</p>
                 </div>

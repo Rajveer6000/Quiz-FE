@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, Badge, Button, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Badge, Button, Loader, PageHeader } from '../components/common';
 import { getResult } from '../api';
 
 const Results = () => {
@@ -52,9 +51,13 @@ const Results = () => {
 
   return (
     <div>
-      <Header title="Test Results" />
+      <PageHeader
+        icon="R"
+        title="Test Results"
+        subtitle="View your test performance"
+      />
 
-      <div className="space-y-6 mt-6 max-w-4xl mx-auto">
+      <div className="space-y-6 max-w-4xl mx-auto">
         {/* Score Overview */}
         <Card className="text-center">
           <div className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center text-4xl font-bold mb-4

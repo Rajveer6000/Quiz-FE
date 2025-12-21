@@ -5,8 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Input, Badge, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Input, Badge, Loader, PageHeader } from '../components/common';
 import { createQuestion, getQuestion, updateQuestion } from '../api';
 import { QUESTION_TYPE_IDS } from '../constants/constants';
 
@@ -150,9 +149,13 @@ const QuestionForm = () => {
 
   return (
     <div>
-      <Header title={isEditing ? 'Edit Question' : 'Create Question'} />
+      <PageHeader
+        icon="Q"
+        title={isEditing ? 'Edit Question' : 'Create Question'}
+        subtitle={isEditing ? 'Update question details' : 'Add a new question'}
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-6 mt-6 max-w-4xl">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
         {/* Question Type */}
         <Card>
           <Card.Header>

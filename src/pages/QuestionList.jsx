@@ -4,10 +4,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Card, Button, Badge, Input, Modal, Loader } from '../components/common';
-import { Header } from '../components/layout';
+import { Card, Button, Badge, Input, Modal, Table, PageHeader } from '../components/common';
 import { listQuestions, deleteQuestion } from '../api';
 import { QUESTION_TYPE_LABELS, DIFFICULTY_LABELS } from '../constants/constants';
+import { HelpCircle, Plus, Pencil, Trash2, Filter } from 'lucide-react';
 
 const QuestionList = () => {
   const [questions, setQuestions] = useState([]);
@@ -59,18 +59,99 @@ const QuestionList = () => {
     }
   };
 
+  const columns = [
+    {
+      key: 'question',
+      title: 'Question',
+      className: 'max-w-2xl',
+      render: (question) => (
+        <div className="flex items-start gap-3">
+          <span className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center text-primary-400 font-semibold shrink-0">
+            {question.id}
+          </span>
+          <div className="space-y-2 min-w-0">
+            <p
+              className="text-white font-medium line-clamp-2"
+              dangerouslySetInnerHTML={{ __html: question.questionText }}
+            />
+            <div className="flex flex-wrap gap-2">
+              {question.subjectName && (
+                <Badge variant="accent">{question.subjectName}</Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'questionType',
+      title: 'Type',
+      render: (question) => (
+        <Badge variant="primary">
+          {QUESTION_TYPE_LABELS[question.questionType] || question.questionType}
+        </Badge>
+      ),
+    },
+    {
+      key: 'difficulty',
+      title: 'Difficulty',
+      render: (question) => (
+        question.difficulty ? (
+          <Badge variant={getDifficultyVariant(question.difficulty)}>
+            {DIFFICULTY_LABELS[question.difficulty] || question.difficulty}
+          </Badge>
+        ) : (
+          <span className="text-gray-500">-</span>
+        )
+      ),
+    },
+    {
+      key: 'actions',
+      title: 'Actions',
+      align: 'right',
+      render: (question) => (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `/questions/${question.id}/edit`;
+            }}
+          >
+            Edit
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-danger-400 hover:text-danger-300"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteModal({ open: true, question });
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
-      <Header
+      <PageHeader
+        icon={<HelpCircle className="w-5 h-5" />}
         title="Question Bank"
+        subtitle="Manage your questions"
         actions={
           <Button variant="primary" onClick={() => window.location.href = '/questions/new'}>
-            + Add Question
+            <Plus className="w-4 h-4" />
+            Add Question
           </Button>
         }
       />
 
-      <div className="space-y-6 mt-6">
+      <div className="space-y-6">
         {/* Filters */}
         <Card>
           <div className="flex flex-wrap gap-4">
@@ -106,80 +187,26 @@ const QuestionList = () => {
         </Card>
 
         {/* Questions List */}
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader size="lg" />
-          </div>
-        ) : questions.length === 0 ? (
-          <Card className="text-center py-12">
-            <div className="text-gray-500">
-              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-lg">No questions found</p>
-              <p className="text-sm mt-1">Start by adding your first question</p>
-              <Button variant="primary" className="mt-4" onClick={() => window.location.href = '/questions/new'}>
-                + Add Question
-              </Button>
-            </div>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {questions.map((question) => (
-              <Card key={question.id} hover className="cursor-pointer">
-                <div className="flex items-start gap-4">
-                  <span className="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center text-primary-400 font-semibold shrink-0">
-                    {question.id}
-                  </span>
-
-                  <div className="flex-1 min-w-0">
-                    <p 
-                      className="text-white font-medium line-clamp-2"
-                      dangerouslySetInnerHTML={{ __html: question.questionText }}
-                    />
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      <Badge variant="primary">
-                        {QUESTION_TYPE_LABELS[question.questionType] || question.questionType}
-                      </Badge>
-                      {question.subjectName && (
-                        <Badge variant="accent">{question.subjectName}</Badge>
-                      )}
-                      {question.difficulty && (
-                        <Badge variant={getDifficultyVariant(question.difficulty)}>
-                          {DIFFICULTY_LABELS[question.difficulty] || question.difficulty}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = `/questions/${question.id}/edit`;
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-danger-400 hover:text-danger-300"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteModal({ open: true, question });
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+        <Table
+          columns={columns}
+          data={questions}
+          rowKey="id"
+          isLoading={loading}
+          emptyState={
+            <Card className="text-center py-12 w-full">
+              <div className="text-gray-500">
+                <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-lg">No questions found</p>
+                <p className="text-sm mt-1">Start by adding your first question</p>
+                <Button variant="primary" className="mt-4" onClick={() => window.location.href = '/questions/new'}>
+                  + Add Question
+                </Button>
+              </div>
+            </Card>
+          }
+        />
 
         {/* Pagination */}
         {pagination.total > pagination.pageSize && (
