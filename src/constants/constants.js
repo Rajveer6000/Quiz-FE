@@ -85,6 +85,8 @@ export const API_ENDPOINTS = {
     BASE: '/tests',
     GET_BY_ID: (id) => `/tests/${id}`,
     ADD_QUESTION: (testId) => `/tests/${testId}/questions`,
+    REMOVE_QUESTION: (testId, questionId) => `/tests/${testId}/questions/${questionId}`,
+    UPDATE_QUESTION: (testId, questionId) => `/tests/${testId}/questions/${questionId}`,
     FINALIZE: (testId) => `/tests/${testId}/finalize`,
   },
 

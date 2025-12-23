@@ -23,6 +23,7 @@ import {
   TestForm,
   QuizWizard,
   TestQuestions,
+  TestDetails,
   // Staff - Users
   UserList,
   UserForm,
@@ -103,6 +104,7 @@ function App() {
                 <Route path="/tests/:testId" element={<TestForm />} />
                 <Route path="/tests/:testId/edit" element={<TestForm />} />
                 <Route path="/tests/:testId/sections/:sectionId/questions" element={<TestQuestions />} />
+                <Route path="/tests/:testId/details" element={<TestDetails />} />
               </Route>
 
               {/* Examinee Routes */}
