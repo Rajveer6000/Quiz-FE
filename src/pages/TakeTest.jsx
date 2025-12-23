@@ -1,61 +1,79 @@
 /**
  * TakeTest Page
- * Browse and start available tests
+ * Browse and start available tests (Modified for Dummy Data Demo)
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Loader, PageHeader } from '../components/common';
-import { listTests, startAttempt } from '../api';
+import { dummyQuizzes } from '../data/dummyQuizzes';
+import { useToast } from '../context';
+import {
+  BookOpen,
+  Clock,
+  HelpCircle,
+  Award,
+  ShoppingCart,
+  Play,
+  AlertTriangle
+} from 'lucide-react';
 
 const TakeTest = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [startModal, setStartModal] = useState({ open: false, test: null });
-  const [starting, setStarting] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ open: false, test: null, type: null }); // type: 'buy' | 'start'
+  const [processing, setProcessing] = useState(false);
+
+  // Local state to track purchases for this session
+  const [purchasedTestIds, setPurchasedTestIds] = useState([]);
 
   useEffect(() => {
-    fetchTests();
+    // Simulate fetching tests
+    setTimeout(() => {
+      setTests(dummyQuizzes);
+      // Auto-purchase the free one
+      const freeTestIds = dummyQuizzes.filter(t => t.price === 0).map(t => t.id);
+      setPurchasedTestIds(freeTestIds);
+      setLoading(false);
+    }, 800);
   }, []);
 
-  const fetchTests = async () => {
-    try {
-      const response = await listTests({ pageSize: 50 });
-      if (response.success) {
-        // Filter only finalized tests
-        setTests((response.data.list || []).filter(t => t.isFinal));
-      }
-    } catch (error) {
-      console.error('Failed to fetch tests:', error);
-    } finally {
-      setLoading(false);
+  const handleAction = (test) => {
+    const isPurchased = purchasedTestIds.includes(test.id);
+    if (isPurchased) {
+      setConfirmModal({ open: true, test, type: 'start' });
+    } else {
+      setConfirmModal({ open: true, test, type: 'buy' });
     }
   };
 
-  const handleStartTest = async () => {
-    if (!startModal.test) return;
-    setStarting(true);
-    try {
-      const response = await startAttempt(startModal.test.id);
-      if (response.success) {
-        navigate(`/attempt/${response.data.attemptId}`);
+  const processAction = async () => {
+    if (!confirmModal.test) return;
+    setProcessing(true);
+
+    // Simulate API delay
+    setTimeout(() => {
+      if (confirmModal.type === 'buy') {
+        setPurchasedTestIds(prev => [...prev, confirmModal.test.id]);
+        toast.success(`Successfully purchased ${confirmModal.test.title}!`);
+        setConfirmModal({ open: false, test: null, type: null });
+      } else {
+        // Start test logic
+        navigate(`/attempt/dummy/${confirmModal.test.id}`);
+        setConfirmModal({ open: false, test: null, type: null });
       }
-    } catch (error) {
-      console.error('Failed to start test:', error);
-      alert(error.message || 'Failed to start test');
-    } finally {
-      setStarting(false);
-      setStartModal({ open: false, test: null });
-    }
+      setProcessing(false);
+    }, 1000);
   };
 
   return (
     <div>
       <PageHeader
-        icon="T"
-        title="Take a Test"
-        subtitle="Browse and start available tests"
+        icon={<BookOpen className="w-5 h-5" />}
+        title="Available Quizzes"
+        subtitle="Browse and purchase quizzes to upgrade your skills"
       />
 
       <div className="space-y-6">
@@ -63,108 +81,104 @@ const TakeTest = () => {
           <div className="flex justify-center py-12">
             <Loader size="lg" />
           </div>
-        ) : tests.length === 0 ? (
-          <Card className="text-center py-12">
-            <div className="text-gray-500">
-              <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <p className="text-lg">No tests available</p>
-              <p className="text-sm mt-1">Check back later for new tests</p>
-            </div>
-          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tests.map((test) => (
-              <Card key={test.id} hover className="flex flex-col">
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge variant="success" dot>Available</Badge>
-                    {test.price > 0 && (
-                      <span className="text-lg font-bold text-gradient">₹{test.price}</span>
+            {tests.map((test) => {
+              const isPurchased = purchasedTestIds.includes(test.id);
+              return (
+                <Card key={test.id} hover className="flex flex-col h-full border-white/5 bg-slate-800/50">
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge variant={isPurchased ? 'success' : 'accent'} dot>
+                        {isPurchased ? 'Purchased' : 'Available'}
+                      </Badge>
+                      <span className={`text-lg font-bold ${isPurchased ? 'text-gray-400' : 'text-emerald-400'}`}>
+                        {test.price === 0 ? 'Free' : `₹${test.price}`}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-semibold text-white mb-2">{test.title}</h3>
+                    <p className="text-gray-400 text-sm line-clamp-2 mb-4 h-10">{test.description}</p>
+
+                    <div className="space-y-3 pt-4 border-t border-white/5">
+                      <div className="flex items-center justify-between text-sm text-gray-400">
+                        <div className="flex items-center gap-2">
+                          <HelpCircle className="w-4 h-4 text-blue-400" />
+                          <span>{test.totalQuestions} Questions</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-violet-400" />
+                          <span>{test.duration} mins</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <Award className="w-4 h-4 text-amber-400" />
+                        <span>{test.totalMarks} Marks</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant={isPurchased ? 'primary' : 'outline'}
+                    className={`w-full mt-6 ${!isPurchased && 'border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10'}`}
+                    onClick={() => handleAction(test)}
+                  >
+                    {isPurchased ? (
+                      <>
+                        <Play className="w-4 h-4 mr-2" /> Start Attempt
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-4 h-4 mr-2" /> Buy Now
+                      </>
                     )}
-                  </div>
-
-                  <h3 className="text-xl font-semibold text-white mb-2">{test.name}</h3>
-                  {test.description && (
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-4">{test.description}</p>
-                  )}
-
-                  <div className="space-y-2 text-sm text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>{test.totalQuestions || 0} Questions</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>{test.durationMin || 0} minutes</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      <span>{test.totalMarks || 0} marks</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  variant="primary"
-                  className="w-full mt-6"
-                  onClick={() => setStartModal({ open: true, test })}
-                >
-                  Start Test
-                </Button>
-              </Card>
-            ))}
+                  </Button>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Start Test Confirmation */}
+      {/* Confirmation Modal */}
       <Modal
-        isOpen={startModal.open}
-        onClose={() => setStartModal({ open: false, test: null })}
-        title="Start Test"
+        isOpen={confirmModal.open}
+        onClose={() => setConfirmModal({ open: false, test: null, type: null })}
+        title={confirmModal.type === 'buy' ? 'Confirm Purchase' : 'Start Quiz'}
         footer={
           <>
-            <Button variant="ghost" onClick={() => setStartModal({ open: false, test: null })}>
+            <Button variant="ghost" onClick={() => setConfirmModal({ open: false, test: null, type: null })}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleStartTest} isLoading={starting}>
-              Start Now
+            <Button
+              variant={confirmModal.type === 'buy' ? 'success' : 'primary'}
+              onClick={processAction}
+              isLoading={processing}
+            >
+              {confirmModal.type === 'buy' ? `Pay ₹${confirmModal.test?.price}` : 'Start Now'}
             </Button>
           </>
         }
       >
         <div className="space-y-4">
-          <p className="text-white font-medium">{startModal.test?.name}</p>
-          
-          <div className="p-4 bg-dark-800 rounded-xl space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Questions:</span>
-              <span className="text-white">{startModal.test?.totalQuestions}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Duration:</span>
-              <span className="text-white">{startModal.test?.durationMin} minutes</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Total Marks:</span>
-              <span className="text-white">{startModal.test?.totalMarks}</span>
-            </div>
-          </div>
+          <p className="text-lg font-medium text-white">{confirmModal.test?.title}</p>
 
-          <div className="p-4 bg-warning-500/10 border border-warning-500/30 rounded-xl">
-            <p className="text-warning-400 text-sm">
-              ⚠️ Once you start, the timer will begin. Make sure you have enough time to complete the test.
+          {confirmModal.type === 'buy' ? (
+            <p className="text-gray-400">
+              Are you sure you want to purchase this quiz for <span className="text-white font-bold">₹{confirmModal.test?.price}</span>?
+              This will deduct the amount from your wallet.
             </p>
-          </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-gray-300">
+                You are about to start the quiz. The timer of <span className="text-white font-bold">{confirmModal.test?.duration} minutes</span> will begin immediately.
+              </p>
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-400 text-sm flex gap-2">
+                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                <p>Do not refresh the page or close the window during the test.</p>
+              </div>
+            </div>
+          )}
         </div>
       </Modal>
     </div>

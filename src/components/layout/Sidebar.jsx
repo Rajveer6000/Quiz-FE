@@ -63,6 +63,9 @@ const Sidebar = () => {
 
   const examineeMenuItems = [
     { path: '/examinee', icon: LayoutDashboard, label: 'Dashboard', visible: true },
+    { path: '/examinee/tests', icon: BookOpen, label: 'Available Quizzes', visible: true },
+    { path: '/examinee/history', icon: ClipboardList, label: 'My Attempts', visible: true },
+    { path: '/examinee/wallet', icon: Shield, label: 'Wallet', visible: true }, // Dummy
   ];
 
   const menuItems = isExaminee() && !isStaff() ? examineeMenuItems : staffMenuItems.filter(item => item.visible);

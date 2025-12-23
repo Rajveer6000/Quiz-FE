@@ -36,6 +36,7 @@ import {
   ExamineeDashboard,
   TakeTest,
   TestAttempt,
+  DummyTestAttempt,
   Results,
   History,
 } from './pages';
@@ -116,6 +117,7 @@ function App() {
                 <Route path="/examinee" element={<ExamineeDashboard />} />
                 <Route path="/examinee/profile" element={<Profile />} />
                 <Route path="/examinee/tests" element={<TakeTest />} />
+                <Route path="/attempt/dummy/:quizId" element={<DummyTestAttempt />} />
                 <Route path="/examinee/history" element={<History />} />
                 <Route path="/examinee/results/:attemptId" element={<Results />} />
               </Route>
