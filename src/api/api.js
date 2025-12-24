@@ -61,6 +61,11 @@ api.interceptors.response.use(
     
     // Handle 401 - Try to refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't retry/redirect for login endpoints (invalid credentials)
+      if (originalRequest.url?.includes('/login')) {
+        return Promise.reject(error);
+      }
+
       // Don't retry refresh endpoints
       if (originalRequest.url?.includes('/refresh')) {
         localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);

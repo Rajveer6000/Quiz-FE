@@ -13,13 +13,13 @@ import { STORAGE_KEYS } from '../constants/constants';
 const ExamineeLogin = () => {
   const navigate = useNavigate();
   const { loginExaminee } = useAuth();
-  
+
   const [organizations, setOrganizations] = useState([]);
   const [organization, setOrganization] = useState(null);
-  const [formData, setFormData] = useState({ 
+  const [formData, setFormData] = useState({
     organizationId: '',
-    email: '', 
-    password: '' 
+    email: '',
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ const ExamineeLogin = () => {
       // First try to resolve organization from domain
       const origin = window.location.hostname;
       const response = await resolveOrganization(origin);
-      
+
       if (response.success && response.data) {
         setOrganization(response.data);
         setFormData(prev => ({ ...prev, organizationId: response.data.id }));
@@ -86,14 +86,14 @@ const ExamineeLogin = () => {
         email: formData.email,
         password: formData.password,
       });
-      
+
       if (response.success) {
         navigate('/examinee');
       } else {
-        setError(response.message || 'Invalid credentials');
+        setError('Login credentials are wrong');
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError('Login credentials are wrong');
     } finally {
       setLoading(false);
     }
@@ -105,8 +105,8 @@ const ExamineeLogin = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           {organization?.logoUrl ? (
-            <img 
-              src={organization.logoUrl} 
+            <img
+              src={organization.logoUrl}
               alt={organization.name}
               className="h-16 mx-auto mb-4"
             />
@@ -170,10 +170,10 @@ const ExamineeLogin = () => {
               required
             />
 
-            <Button 
-              type="submit" 
-              variant="primary" 
-              className="w-full" 
+            <Button
+              type="submit"
+              variant="primary"
+              className="w-full"
               isLoading={loading}
             >
               Sign In

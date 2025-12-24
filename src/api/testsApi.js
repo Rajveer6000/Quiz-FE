@@ -166,6 +166,16 @@ export const getTemplateSections = async (templateId, params = {}) => {
   return normalizeResponse(response);
 };
 
+/**
+ * Get available tests for examinee (finalized only)
+ * @param {Object} [params] - Query parameters
+ * @returns {Promise} Response with available tests
+ */
+export const getAvailableTests = async (params = {}) => {
+  const response = await api.get(TESTS.AVAILABLE, { params });
+  return normalizeResponse(response);
+};
+
 export default {
   listTests,
   createTest,
@@ -179,4 +189,5 @@ export default {
   getTestTypes,
   getTemplatesByType,
   getTemplateSections,
+  getAvailableTests,
 };
