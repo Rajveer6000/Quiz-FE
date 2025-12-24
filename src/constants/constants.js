@@ -88,6 +88,14 @@ export const API_ENDPOINTS = {
     REMOVE_QUESTION: (testId, questionId) => `/tests/${testId}/questions/${questionId}`,
     UPDATE_QUESTION: (testId, questionId) => `/tests/${testId}/questions/${questionId}`,
     FINALIZE: (testId) => `/tests/${testId}/finalize`,
+    AVAILABLE: '/tests/available',
+  },
+
+  // Purchases
+  PURCHASES: {
+    BASE: '/purchases',
+    ME: '/purchases/me',
+    CHECK_ACCESS: (testId) => `/purchases/check-access/${testId}`,
   },
 
   // File Upload
