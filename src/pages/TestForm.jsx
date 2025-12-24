@@ -7,11 +7,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, Input, Badge, Loader, PageHeader } from '../components/common';
 import { createTest, getTest, updateTest } from '../api';
+import { useToast } from '../context';
 
 const TestForm = () => {
   const params = useParams();
   const id = params.testId || params.id; // Support both route param names
   const navigate = useNavigate();
+  const { toast } = useToast();
   const isEditing = Boolean(id);
 
   const [loading, setLoading] = useState(isEditing);
@@ -37,10 +39,14 @@ const TestForm = () => {
   const fetchTest = async () => {
     try {
       const response = await getTest(id);
-        console.log('TestForm - getTest response:', response);
+      console.log('TestForm - getTest response:', response);
       if (response.success) {
         const test = response.data;
         console.log('TestForm - sections:', test.sections);
+        if (test.isFinal || test.status === 'PUBLISHED') {
+          navigate(`/tests/${id}/details`, { replace: true });
+          return;
+        }
         setFormData({
           name: test.name || '',
           description: test.description || '',
@@ -90,10 +96,14 @@ const TestForm = () => {
 
       if (isEditing) {
         await updateTest(id, payload);
+        toast.success('Test updated successfully!');
+        // Re-fetch data to refresh the component with updated data
+        await fetchTest();
       } else {
         await createTest(payload);
+        toast.success('Test created successfully!');
+        navigate('/tests');
       }
-      navigate('/tests');
     } catch (error) {
       console.error('Failed to save test:', error);
       if (error.message) {

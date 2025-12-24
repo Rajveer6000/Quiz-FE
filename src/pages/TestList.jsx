@@ -165,7 +165,7 @@ const QuizList = () => {
             </>
           ) : (
             <button
-              onClick={() => navigate(`/tests/${quiz.id}`)}
+              onClick={() => navigate(`/tests/${quiz.id}/details`)}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
             >
               <Eye className="w-4 h-4" />

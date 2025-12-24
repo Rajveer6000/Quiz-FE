@@ -23,6 +23,7 @@ import {
   TestForm,
   QuizWizard,
   TestQuestions,
+  TestDetails,
   // Staff - Users
   UserList,
   UserForm,
@@ -35,6 +36,7 @@ import {
   ExamineeDashboard,
   TakeTest,
   TestAttempt,
+  DummyTestAttempt,
   Results,
   History,
 } from './pages';
@@ -103,6 +105,7 @@ function App() {
                 <Route path="/tests/:testId" element={<TestForm />} />
                 <Route path="/tests/:testId/edit" element={<TestForm />} />
                 <Route path="/tests/:testId/sections/:sectionId/questions" element={<TestQuestions />} />
+                <Route path="/tests/:testId/details" element={<TestDetails />} />
               </Route>
 
               {/* Examinee Routes */}
@@ -114,6 +117,7 @@ function App() {
                 <Route path="/examinee" element={<ExamineeDashboard />} />
                 <Route path="/examinee/profile" element={<Profile />} />
                 <Route path="/examinee/tests" element={<TakeTest />} />
+                <Route path="/attempt/dummy/:quizId" element={<DummyTestAttempt />} />
                 <Route path="/examinee/history" element={<History />} />
                 <Route path="/examinee/results/:attemptId" element={<Results />} />
               </Route>
