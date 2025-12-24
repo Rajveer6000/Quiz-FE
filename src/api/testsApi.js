@@ -112,6 +112,29 @@ export const finalizeTest = async (testId) => {
 };
 
 /**
+ * Remove question from test
+ * @param {number} testId - Test ID
+ * @param {number} questionId - Question ID to remove
+ * @returns {Promise} Response confirming removal
+ */
+export const removeQuestionFromTest = async (testId, questionId) => {
+  const response = await api.delete(TESTS.REMOVE_QUESTION(testId, questionId));
+  return normalizeResponse(response);
+};
+
+/**
+ * Update question in test
+ * @param {number} testId - Test ID
+ * @param {number} questionId - Question ID to update
+ * @param {Object} data - Updated question data
+ * @returns {Promise} Response with updated question
+ */
+export const updateTestQuestion = async (testId, questionId, data) => {
+  const response = await api.put(TESTS.UPDATE_QUESTION(testId, questionId), data);
+  return normalizeResponse(response);
+};
+
+/**
  * Get test types (JEE, NEET, etc.)
  * @param {Object} [params] - Query parameters
  * @returns {Promise} Response with test types list
@@ -150,6 +173,8 @@ export default {
   updateTest,
   deleteTest,
   addQuestionToTest,
+  removeQuestionFromTest,
+  updateTestQuestion,
   finalizeTest,
   getTestTypes,
   getTemplatesByType,

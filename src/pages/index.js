@@ -21,6 +21,7 @@ export { default as TestList } from './TestList';
 export { default as TestForm } from './TestForm';
 export { default as QuizWizard } from './QuizWizard';
 export { default as TestQuestions } from './TestQuestions';
+export { default as TestDetails } from './TestDetails';
 
 // Staff pages - Users
 export { default as UserList } from './UserList';
@@ -39,3 +40,4 @@ export { default as TakeTest } from './TakeTest';
 export { default as TestAttempt } from './TestAttempt';
 export { default as Results } from './Results';
 export { default as History } from './History';
+export { default as DummyTestAttempt } from './DummyTestAttempt';
