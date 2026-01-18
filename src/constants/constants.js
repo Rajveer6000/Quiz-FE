@@ -61,6 +61,10 @@ export const API_ENDPOINTS = {
   TEST_ATTEMPTS: {
     BASE: '/test-attempts',
     START: '/test-attempts/start',
+    TEST_DETAILS: (testId) => `/test-attempts/tests/${testId}/details`,
+    STRUCTURE: (attemptId) => `/test-attempts/${attemptId}/structure`,
+    SYNC: (attemptId) => `/test-attempts/${attemptId}/sync`,
+    QUESTION: (attemptId, testQuestionId) => `/test-attempts/${attemptId}/questions/${testQuestionId}`,
     GET_STATE: (attemptId) => `/test-attempts/${attemptId}`,
     SAVE_ANSWER: (attemptId) => `/test-attempts/${attemptId}/answer`,
     MARK_REVIEW: (attemptId) => `/test-attempts/${attemptId}/review`,
@@ -247,6 +251,7 @@ export const STORAGE_KEYS = {
   USER_DATA: 'quiz_user_data',
   ORGANIZATION: 'quiz_organization',
   THEME: 'quiz_theme',
+  CURRENT_ATTEMPT: 'quiz_current_attempt',
 };
 
 // =============================================================================

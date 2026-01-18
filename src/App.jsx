@@ -37,6 +37,7 @@ import {
   TakeTest,
   TestAttempt,
   DummyTestAttempt,
+  TestStartPage,
   Results,
   History,
 } from './pages';
@@ -69,6 +70,13 @@ function App() {
               <Route path="/attempt/:attemptId" element={
                 <ProtectedRoute>
                   <TestAttempt />
+                </ProtectedRoute>
+              } />
+
+              {/* Test Start Page - Pre-test confirmation with fullscreen */}
+              <Route path="/attempt/start/:testId" element={
+                <ProtectedRoute>
+                  <TestStartPage />
                 </ProtectedRoute>
               } />
 

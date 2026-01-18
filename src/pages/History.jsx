@@ -36,13 +36,17 @@ const History = () => {
   }, [pagination.page]);
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleString('en-US', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
     });
+  };
+
+  const formatScore = (value) => {
+    const parsed = typeof value === 'number' ? value : parseFloat(value);
+    const safeValue = Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : 0;
+    return safeValue.toFixed(1);
   };
 
   const columns = [
@@ -67,7 +71,7 @@ const History = () => {
       render: (attempt) => (
         attempt.isCompleted ? (
           <span className="text-white font-semibold">
-            {attempt.percentageScore?.toFixed(1)}%
+            {formatScore(attempt.percentageScore)}%
           </span>
         ) : (
           <span className="text-gray-400">-</span>

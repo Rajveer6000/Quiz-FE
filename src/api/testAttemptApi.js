@@ -12,7 +12,8 @@ const { TEST_ATTEMPTS } = API_ENDPOINTS;
  * Check if API response is successful
  */
 const isSuccess = (response) => {
-  return response?.result?.responseCode === 200 || response?.success === true;
+  const code = response?.result?.responseCode;
+  return code === 200 || code === 201 || response?.success === true;
 };
 
 /**
@@ -29,12 +30,58 @@ const normalizeResponse = (response) => {
 };
 
 /**
+ * Get test details for starting an attempt
+ * @param {number} testId - Test ID
+ * @returns {Promise} Response with test details including sections, purchase status, and time status
+ */
+export const getTestDetails = async (testId) => {
+  const response = await api.get(TEST_ATTEMPTS.TEST_DETAILS(testId));
+  return normalizeResponse(response);
+};
+
+/**
  * Start a new test attempt
  * @param {number} testId - Test ID to attempt
  * @returns {Promise} Response with new attempt ID and initial state
  */
 export const startAttempt = async (testId) => {
   const response = await api.post(TEST_ATTEMPTS.START, { testId });
+  return normalizeResponse(response);
+};
+
+/**
+ * Get attempt structure with sections and questions
+ * @param {number} attemptId - Attempt ID
+ * @returns {Promise} Response with attempt structure including sections and question statuses
+ */
+export const getAttemptStructure = async (attemptId) => {
+  const response = await api.get(TEST_ATTEMPTS.STRUCTURE(attemptId));
+  return normalizeResponse(response);
+};
+
+/**
+ * Sync attempt state with server (call every 5 seconds)
+ * @param {number} attemptId - Attempt ID
+ * @param {Object} data - Sync data
+ * @param {number} data.timeRemainingMs - Time remaining in milliseconds
+ * @param {number} data.currentSectionId - Current section ID
+ * @param {number} data.currentQuestionId - Current question ID
+ * @param {Array} [data.answers] - Pending answers to sync
+ * @returns {Promise} Response with server time and updated remaining time
+ */
+export const syncAttempt = async (attemptId, data) => {
+  const response = await api.post(TEST_ATTEMPTS.SYNC(attemptId), data);
+  return normalizeResponse(response);
+};
+
+/**
+ * Get question details including options
+ * @param {number} attemptId - Attempt ID
+ * @param {number} testQuestionId - Test Question ID
+ * @returns {Promise} Response with full question details and options
+ */
+export const getAttemptQuestion = async (attemptId, testQuestionId) => {
+  const response = await api.get(TEST_ATTEMPTS.QUESTION(attemptId, testQuestionId));
   return normalizeResponse(response);
 };
 
@@ -163,7 +210,11 @@ export const logWindowEvent = async (attemptId, data) => {
 };
 
 export default {
+  getTestDetails,
   startAttempt,
+  getAttemptStructure,
+  syncAttempt,
+  getAttemptQuestion,
   getAttemptState,
   saveAnswer,
   markForReview,

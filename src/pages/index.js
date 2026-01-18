@@ -41,3 +41,5 @@ export { default as TestAttempt } from './TestAttempt';
 export { default as Results } from './Results';
 export { default as History } from './History';
 export { default as DummyTestAttempt } from './DummyTestAttempt';
+export { default as TestStartPage } from './TestStartPage';
+
