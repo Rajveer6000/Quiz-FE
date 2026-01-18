@@ -98,6 +98,13 @@ export const API_ENDPOINTS = {
     CHECK_ACCESS: (testId) => `/purchases/check-access/${testId}`,
   },
 
+  // Payments (Razorpay)
+  PAYMENTS: {
+    CREATE_ORDER: '/payments/create-order',
+    CONFIG: '/payments/config',
+    VERIFY: '/payments/verify',
+  },
+
   // File Upload
   UPLOAD: {
     SINGLE: '/upload',
