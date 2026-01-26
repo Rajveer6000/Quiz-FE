@@ -40,3 +40,7 @@ export { default as testsApi } from './testsApi';
 // Question Types
 export * from './questionTypesApi';
 export { default as questionTypesApi } from './questionTypesApi';
+
+// Dashboard
+export * from './dashboardApi';
+export { default as dashboardApi } from './dashboardApi';

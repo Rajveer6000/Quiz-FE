@@ -99,7 +99,6 @@ const Results = () => {
   const marksPossible = toNumber(result.totalMarksPossible);
   const negativeMarks = toNumber(result.totalNegativeMarks);
   const timeTaken = toNumber(result.actualTimeConsumedMin);
-  const percentileValue = toNumber(result.percentile, null);
   const totalQuestions = toNumber(result.totalQuestions);
   const totalCorrect = toNumber(result.totalCorrect);
   const totalIncorrect = toNumber(result.totalIncorrect);
@@ -110,11 +109,16 @@ const Results = () => {
     return Number.isFinite(ratio) ? Math.max(0, ratio * 100) : 0;
   };
 
-  // Use pass status from API or calculate from threshold (e.g., 40%)
-  const isPassed = result.isPassed === true || (result.isPassed === null && score >= 40);
+  // Calculate pass status from score threshold (40%) since isPassed removed from API
+  const isPassed = score >= 40;
 
   // Safe score for visualization (clamped to 0-100)
   const visualScore = Math.max(0, Math.min(100, score));
+
+  // Rank display
+  const rankDisplay = result.rank && result.totalParticipants
+    ? `#${result.rank} of ${result.totalParticipants}`
+    : result.rank ? `#${result.rank}` : 'N/A';
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 pb-12">
@@ -133,10 +137,14 @@ const Results = () => {
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            Test Results
+            {result.testName || 'Test Results'}
           </h1>
+          {result.testDescription && (
+            <p className="text-gray-300 text-base max-w-2xl mx-auto mb-3">
+              {result.testDescription}
+            </p>
+          )}
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Review your performance for <span className="text-primary-400 font-medium">Test ID #{result.testId}</span>.
             Submitted on {new Date(result.submittedAt).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })}
           </p>
         </div>
@@ -189,7 +197,7 @@ const Results = () => {
                   <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                     <div className="flex items-center gap-2 text-sm text-gray-300 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                       <BarChart2 className="w-4 h-4 text-primary-400" />
-                      Rank: <span className="font-bold text-white">#{result.rank || 'N/A'}</span>
+                      Rank: <span className="font-bold text-white">{rankDisplay}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-300 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
                       <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -323,9 +331,9 @@ const Results = () => {
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400 flex items-center gap-2">
                     <Trophy className="w-4 h-4 text-yellow-500" />
-                    Percentile
+                    Rank
                   </span>
-                  <span className="font-bold text-white">{Number.isFinite(percentileValue) ? `${percentileValue.toFixed(1)}%` : 'N/A'}</span>
+                  <span className="font-bold text-white">{rankDisplay}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-400 flex items-center gap-2">

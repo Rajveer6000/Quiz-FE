@@ -203,6 +203,12 @@ const TestAttempt = () => {
     }
   }, [attemptId, navigate, showToast]);
 
+  // Ref for loadQuestion to avoid dependency issues
+  const loadQuestionRef = useRef(loadQuestion);
+  useEffect(() => {
+    loadQuestionRef.current = loadQuestion;
+  }, [loadQuestion]);
+
   // Load attempt structure
   useEffect(() => {
     const loadStructure = async () => {
@@ -230,8 +236,28 @@ const TestAttempt = () => {
           });
           setAnswers(initialAnswers);
 
+          // Load first question using ref to avoid dependency cycle
           if (data.sections?.[0]?.questions?.[0]) {
-            await loadQuestion(data.sections[0].questions[0].testQuestionId);
+            const firstQuestionId = data.sections[0].questions[0].testQuestionId;
+            // Directly load the first question without going through the cached loadQuestion
+            // This avoids the circular dependency issue
+            try {
+              setLoadingQuestion(true);
+              const questionResponse = await getAttemptQuestion(attemptId, firstQuestionId);
+              if (questionResponse.success) {
+                setCurrentQuestion(questionResponse.data);
+                questionStartTime.current = Date.now();
+                setVisitedQuestions(prev => new Set([...prev, firstQuestionId]));
+                setQuestionCache(prev => ({
+                  ...prev,
+                  [firstQuestionId]: questionResponse.data
+                }));
+              }
+            } catch (error) {
+              console.error('Error loading first question:', error);
+            } finally {
+              setLoadingQuestion(false);
+            }
           }
         } else {
           setError(response.message || 'Failed to load test');
@@ -246,7 +272,7 @@ const TestAttempt = () => {
 
     loadStructure();
     requestFullscreen();
-  }, [attemptId, loadQuestion, requestFullscreen]);
+  }, [attemptId, requestFullscreen]);
 
   // Timer effect - only run when structure is loaded
   useEffect(() => {

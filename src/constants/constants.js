@@ -114,6 +114,13 @@ export const API_ENDPOINTS = {
     SINGLE: '/upload',
     MULTIPLE: '/upload/multiple',
   },
+
+  // Dashboard
+  DASHBOARD: {
+    EXAMINEE_STATS: '/dashboard/examinee/stats',
+    EXAMINEE_GRAPH: '/dashboard/examinee/graph',
+    PAUSED_TESTS: '/dashboard/examinee/paused-tests',
+  },
 };
 
 // =============================================================================
