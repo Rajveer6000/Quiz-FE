@@ -40,6 +40,7 @@ import {
 const ExamineeDashboard = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [graphLoading, setGraphLoading] = useState(false);
   const [stats, setStats] = useState(null);
   const [graphData, setGraphData] = useState(null);
   const [groupBy, setGroupBy] = useState('day');
@@ -60,42 +61,53 @@ const ExamineeDashboard = () => {
     };
   };
 
-  const fetchData = async () => {
+  // Fetch stats only on initial load
+  const fetchStats = async () => {
     setLoading(true);
     setError(null);
     try {
-      const range = dateRange.startDate && dateRange.endDate
-        ? dateRange
-        : getDefaultDateRange();
-
-      const [statsRes, graphRes] = await Promise.all([
-        getExamineeStats(),
-        getExamineeGraph({ ...range, groupBy }),
-      ]);
-
+      const statsRes = await getExamineeStats();
       if (statsRes.success) {
         setStats(statsRes.data);
       }
-      if (graphRes.success) {
-        setGraphData(graphRes.data);
-      }
     } catch (err) {
-      console.error('Failed to fetch dashboard data:', err);
-      setError('Failed to load dashboard data');
+      console.error('Failed to fetch stats:', err);
+      setError('Failed to load dashboard stats');
     } finally {
       setLoading(false);
     }
   };
 
+  // Fetch graph data when filters change
+  const fetchGraphData = async () => {
+    setGraphLoading(true);
+    try {
+      const range = dateRange.startDate && dateRange.endDate
+        ? dateRange
+        : getDefaultDateRange();
+
+      const graphRes = await getExamineeGraph({ ...range, groupBy });
+      if (graphRes.success) {
+        setGraphData(graphRes.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch graph data:', err);
+    } finally {
+      setGraphLoading(false);
+    }
+  };
+
+  // Initial load: set date range and fetch stats
   useEffect(() => {
-    // Set default date range on mount
     const defaultRange = getDefaultDateRange();
     setDateRange(defaultRange);
+    fetchStats();
   }, []);
 
+  // Fetch graph data when filters change
   useEffect(() => {
     if (dateRange.startDate && dateRange.endDate) {
-      fetchData();
+      fetchGraphData();
     }
   }, [dateRange, groupBy]);
 
@@ -280,8 +292,8 @@ const ExamineeDashboard = () => {
                     key={option}
                     onClick={() => setGroupBy(option)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${groupBy === option
-                        ? 'bg-primary-500 text-white'
-                        : 'bg-slate-700/50 text-gray-400 hover:bg-slate-700'
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-slate-700/50 text-gray-400 hover:bg-slate-700'
                       }`}
                   >
                     {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -303,7 +315,14 @@ const ExamineeDashboard = () => {
               </Card.Title>
             </Card.Header>
             <Card.Content>
-              {chartData.length > 0 ? (
+              {graphLoading ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <div className="text-center">
+                    <Loader size="md" />
+                    <p className="text-gray-400 mt-2 text-sm">Updating chart...</p>
+                  </div>
+                </div>
+              ) : chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={chartData}>
                     <defs>
@@ -370,7 +389,14 @@ const ExamineeDashboard = () => {
               </Card.Title>
             </Card.Header>
             <Card.Content>
-              {chartData.length > 0 ? (
+              {graphLoading ? (
+                <div className="h-[300px] flex items-center justify-center">
+                  <div className="text-center">
+                    <Loader size="md" />
+                    <p className="text-gray-400 mt-2 text-sm">Updating chart...</p>
+                  </div>
+                </div>
+              ) : chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />

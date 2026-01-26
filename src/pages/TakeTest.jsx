@@ -1,14 +1,10 @@
-/**
- * TakeTest Page
- * Browse and start available tests with Razorpay payment integration
- */
-
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Loader, PageHeader } from '../components/common';
 import { useToast } from '../context';
 import { getAvailableTests } from '../api/testsApi';
 import { createOrder, getPaymentConfig, verifyPayment } from '../api/paymentsApi';
+import { purchaseTest } from '../api/purchasesApi';
 import {
   BookOpen,
   Clock,
@@ -39,8 +35,8 @@ const PaymentResultModal = ({ isOpen, onClose, status, testName, onRetry, onCont
         {/* Animated Icon */}
         <div className={`relative mb-6 ${isSuccess ? 'animate-bounce' : 'animate-pulse'}`}>
           <div className={`w-24 h-24 rounded-full flex items-center justify-center ${isSuccess
-              ? 'bg-gradient-to-br from-emerald-400 to-green-600 shadow-lg shadow-emerald-500/30'
-              : 'bg-gradient-to-br from-red-400 to-rose-600 shadow-lg shadow-red-500/30'
+            ? 'bg-gradient-to-br from-emerald-400 to-green-600 shadow-lg shadow-emerald-500/30'
+            : 'bg-gradient-to-br from-red-400 to-rose-600 shadow-lg shadow-red-500/30'
             }`}>
             {isSuccess ? (
               <CheckCircle className="w-12 h-12 text-white" />
@@ -283,7 +279,34 @@ const TakeTest = () => {
 
     try {
       if (confirmModal.type === 'buy') {
-        // Create order first
+        const isFree = !confirmModal.test.price || confirmModal.test.price === 0;
+
+        if (isFree) {
+          // Direct purchase for free tests
+          const response = await purchaseTest(confirmModal.test.id);
+          if (response.success) {
+            setPaymentResult({
+              open: true,
+              status: 'success',
+              testName: confirmModal.test.name,
+              testId: confirmModal.test.id
+            });
+            await fetchTests(); // Refresh list
+            setConfirmModal({ open: false, test: null, type: null });
+          } else {
+            showToast(response.message || 'Failed to add free test', 'error');
+            setPaymentResult({
+              open: true,
+              status: 'failed',
+              testName: confirmModal.test.name,
+              testId: confirmModal.test.id
+            });
+          }
+          setProcessing(false);
+          return;
+        }
+
+        // Paid test - Create order first
         const orderResponse = await createOrder('TEST', confirmModal.test.id);
 
         if (!orderResponse.success) {
