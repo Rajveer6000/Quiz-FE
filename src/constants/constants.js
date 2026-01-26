@@ -61,6 +61,10 @@ export const API_ENDPOINTS = {
   TEST_ATTEMPTS: {
     BASE: '/test-attempts',
     START: '/test-attempts/start',
+    TEST_DETAILS: (testId) => `/test-attempts/tests/${testId}/details`,
+    STRUCTURE: (attemptId) => `/test-attempts/${attemptId}/structure`,
+    SYNC: (attemptId) => `/test-attempts/${attemptId}/sync`,
+    QUESTION: (attemptId, testQuestionId) => `/test-attempts/${attemptId}/questions/${testQuestionId}`,
     GET_STATE: (attemptId) => `/test-attempts/${attemptId}`,
     SAVE_ANSWER: (attemptId) => `/test-attempts/${attemptId}/answer`,
     MARK_REVIEW: (attemptId) => `/test-attempts/${attemptId}/review`,
@@ -98,10 +102,24 @@ export const API_ENDPOINTS = {
     CHECK_ACCESS: (testId) => `/purchases/check-access/${testId}`,
   },
 
+  // Payments (Razorpay)
+  PAYMENTS: {
+    CREATE_ORDER: '/payments/create-order',
+    CONFIG: '/payments/config',
+    VERIFY: '/payments/verify',
+  },
+
   // File Upload
   UPLOAD: {
     SINGLE: '/upload',
     MULTIPLE: '/upload/multiple',
+  },
+
+  // Dashboard
+  DASHBOARD: {
+    EXAMINEE_STATS: '/dashboard/examinee/stats',
+    EXAMINEE_GRAPH: '/dashboard/examinee/graph',
+    PAUSED_TESTS: '/dashboard/examinee/paused-tests',
   },
 };
 
@@ -240,6 +258,7 @@ export const STORAGE_KEYS = {
   USER_DATA: 'quiz_user_data',
   ORGANIZATION: 'quiz_organization',
   THEME: 'quiz_theme',
+  CURRENT_ATTEMPT: 'quiz_current_attempt',
 };
 
 // =============================================================================
