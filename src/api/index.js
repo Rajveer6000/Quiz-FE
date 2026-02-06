@@ -44,3 +44,8 @@ export { default as questionTypesApi } from './questionTypesApi';
 // Dashboard
 export * from './dashboardApi';
 export { default as dashboardApi } from './dashboardApi';
+
+// Groups
+export * from './groupsApi';
+export { default as groupsApi } from './groupsApi';
+

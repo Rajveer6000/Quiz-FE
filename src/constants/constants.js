@@ -47,6 +47,13 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/examinees/${id}`,
   },
 
+  // Groups
+  GROUPS: {
+    BASE: '/groups',
+    GET_BY_ID: (id) => `/groups/${id}`,
+    EXTRACT_EMAILS: '/groups/extract-emails',
+  },
+
   // Test Types & Templates
   TEST_TYPES: {
     BASE: '/test-types/types',

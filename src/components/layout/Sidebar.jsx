@@ -15,7 +15,8 @@ import {
   User,
   LogOut,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  UsersRound
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -39,6 +40,12 @@ const Sidebar = () => {
       path: '/examinees',
       icon: GraduationCap,
       label: 'Examinees',
+      visible: canRead(MODULES.USERS)
+    },
+    {
+      path: '/groups',
+      icon: UsersRound,
+      label: 'Groups',
       visible: canRead(MODULES.USERS)
     },
     {

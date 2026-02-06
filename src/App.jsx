@@ -32,6 +32,9 @@ import {
   RoleForm,
   // Staff - Examinees
   ExamineeList,
+  // Staff - Groups
+  GroupList,
+  GroupForm,
   // Examinee
   ExamineeDashboard,
   TakeTest,
@@ -101,6 +104,11 @@ function App() {
 
                 {/* Examinees */}
                 <Route path="/examinees" element={<ExamineeList />} />
+
+                {/* Groups */}
+                <Route path="/groups" element={<GroupList />} />
+                <Route path="/groups/new" element={<GroupForm />} />
+                <Route path="/groups/:id" element={<GroupForm />} />
 
                 {/* Questions */}
                 <Route path="/questions" element={<QuestionList />} />

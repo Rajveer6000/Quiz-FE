@@ -34,6 +34,10 @@ export { default as RoleForm } from './RoleForm';
 // Staff pages - Examinees
 export { default as ExamineeList } from './ExamineeList';
 
+// Staff pages - Groups
+export { default as GroupList } from './GroupList';
+export { default as GroupForm } from './GroupForm';
+
 // Examinee pages
 export { default as ExamineeDashboard } from './ExamineeDashboard';
 export { default as TakeTest } from './TakeTest';
