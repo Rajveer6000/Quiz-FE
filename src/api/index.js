@@ -49,3 +49,10 @@ export { default as dashboardApi } from './dashboardApi';
 export * from './groupsApi';
 export { default as groupsApi } from './groupsApi';
 
+// Allocations
+export * from './allocationsApi';
+export { default as allocationsApi } from './allocationsApi';
+
+// Payments
+export * from './paymentsApi';
+export { default as paymentsApi } from './paymentsApi';

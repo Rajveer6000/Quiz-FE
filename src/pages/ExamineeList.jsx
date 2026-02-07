@@ -39,8 +39,8 @@ const ExamineeList = () => {
       }
       const response = await listExaminees(params);
       if (response.success) {
-        setExaminees(response.data.list || []);
-        setPagination(prev => ({ ...prev, total: response.data.totalRecords }));
+        setExaminees(response.data?.list || []);
+        setPagination(prev => ({ ...prev, total: response.data?.totalRecords || 0 }));
       }
     } catch (error) {
       console.error('Failed to fetch examinees:', error);

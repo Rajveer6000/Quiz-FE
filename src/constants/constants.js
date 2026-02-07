@@ -116,6 +116,13 @@ export const API_ENDPOINTS = {
     VERIFY: '/payments/verify',
   },
 
+  // Allocations (Bulk Purchase)
+  ALLOCATIONS: {
+    BASE: '/allocations',
+    GET_BY_ID: (id) => `/allocations/${id}`,
+    VERIFY: '/allocations/verify',
+  },
+
   // File Upload
   UPLOAD: {
     SINGLE: '/upload',

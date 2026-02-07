@@ -38,6 +38,11 @@ export { default as ExamineeList } from './ExamineeList';
 export { default as GroupList } from './GroupList';
 export { default as GroupForm } from './GroupForm';
 
+// Staff pages - Allocations
+export { default as AllocationList } from './AllocationList';
+export { default as AllocationDetails } from './AllocationDetails';
+
+
 // Examinee pages
 export { default as ExamineeDashboard } from './ExamineeDashboard';
 export { default as TakeTest } from './TakeTest';

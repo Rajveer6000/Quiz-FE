@@ -35,6 +35,8 @@ import {
   // Staff - Groups
   GroupList,
   GroupForm,
+  AllocationList,
+  AllocationDetails,
   // Examinee
   ExamineeDashboard,
   TakeTest,
@@ -108,6 +110,10 @@ function App() {
                 {/* Groups */}
                 <Route path="/groups" element={<GroupList />} />
                 <Route path="/groups/new" element={<GroupForm />} />
+
+                {/* Allocations */}
+                <Route path="/allocations" element={<AllocationList />} />
+                <Route path="/allocations/:id" element={<AllocationDetails />} />
                 <Route path="/groups/:id" element={<GroupForm />} />
 
                 {/* Questions */}

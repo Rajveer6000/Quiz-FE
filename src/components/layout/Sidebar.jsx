@@ -49,6 +49,12 @@ const Sidebar = () => {
       visible: canRead(MODULES.USERS)
     },
     {
+      path: '/allocations',
+      icon: ClipboardList,
+      label: 'Allocations',
+      visible: canRead(MODULES.QUIZZES) // Allocations related to tests
+    },
+    {
       path: '/roles',
       icon: Shield,
       label: 'Roles',
