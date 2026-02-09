@@ -15,7 +15,8 @@ import {
   User,
   LogOut,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  UsersRound
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -40,6 +41,18 @@ const Sidebar = () => {
       icon: GraduationCap,
       label: 'Examinees',
       visible: canRead(MODULES.USERS)
+    },
+    {
+      path: '/groups',
+      icon: UsersRound,
+      label: 'Groups',
+      visible: canRead(MODULES.USERS)
+    },
+    {
+      path: '/allocations',
+      icon: ClipboardList,
+      label: 'Allocations',
+      visible: canRead(MODULES.QUIZZES) // Allocations related to tests
     },
     {
       path: '/roles',

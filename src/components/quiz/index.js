@@ -14,3 +14,4 @@ export { default as QuizTypeSelector } from './QuizTypeSelector';
 export { default as TemplateSelector } from './TemplateSelector';
 export { default as SectionBuilder } from './SectionBuilder';
 export { default as QuizReviewStep } from './QuizReviewStep';
+export { default as AllocateModal } from './AllocateModal';

@@ -20,8 +20,10 @@ import {
   Calendar,
   MoreVertical,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  CreditCard
 } from 'lucide-react';
+import { AllocateModal } from '../components/quiz';
 
 const QuizList = () => {
   const navigate = useNavigate();
@@ -30,14 +32,25 @@ const QuizList = () => {
   const [pagination, setPagination] = useState({ page: 0, pageSize: 10, total: 0 });
   const [deleteModal, setDeleteModal] = useState({ open: false, quiz: null });
   const [finalizeModal, setFinalizeModal] = useState({ open: false, quiz: null });
+  const [allocateModal, setAllocateModal] = useState({ open: false, quiz: null });
+
+  /* Tab State */
+  const [activeTab, setActiveTab] = useState('my_quizzes'); // 'my_quizzes' | 'published_store'
 
   const fetchQuizzes = async () => {
     setLoading(true);
     try {
-      const response = await listTests({
+      const params = {
         pageNo: pagination.page,
         pageSize: pagination.pageSize,
-      });
+      };
+
+      // Filter based on active tab
+      if (activeTab === 'published_store') {
+        params.isFinal = true;
+      }
+
+      const response = await listTests(params);
       if (response.success) {
         setQuizzes(response.data.list || []);
         setPagination(prev => ({ ...prev, total: response.data.totalRecords }));
@@ -51,7 +64,7 @@ const QuizList = () => {
 
   useEffect(() => {
     fetchQuizzes();
-  }, [pagination.page]);
+  }, [pagination.page, activeTab]);
 
   const handleDelete = async () => {
     if (!deleteModal.quiz) return;
@@ -76,6 +89,8 @@ const QuizList = () => {
   };
 
   const QuizCard = ({ quiz }) => {
+    const isPublishedStore = activeTab === 'published_store';
+
     return (
       <div className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:border-white/20 hover:bg-slate-800/70 transition-all duration-300 overflow-hidden">
         {/* Status Badge */}
@@ -140,37 +155,58 @@ const QuizList = () => {
 
         {/* Actions */}
         <div className="flex gap-2 mt-5 pt-5 border-t border-white/5">
-          {!quiz.isFinal ? (
-            <>
-              <button
-                onClick={() => navigate(`/tests/${quiz.id}/edit`)}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
-              >
-                <Pencil className="w-4 h-4" />
-                Edit
-              </button>
-              <button
-                onClick={() => setFinalizeModal({ open: true, quiz })}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-500/20 text-violet-400 hover:bg-violet-500/30 transition-all text-sm font-medium"
-              >
-                <Lock className="w-4 h-4" />
-                Publish
-              </button>
-              <button
-                onClick={() => setDeleteModal({ open: true, quiz })}
-                className="flex items-center justify-center w-10 py-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </>
-          ) : (
+          {isPublishedStore ? (
+            /* Published Store Actions using simple button element to ensure no import issues */
             <button
-              onClick={() => navigate(`/tests/${quiz.id}/details`)}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+              onClick={() => setAllocateModal({ open: true, quiz })}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-500 text-white hover:bg-violet-600 transition-all text-sm font-bold shadow-lg shadow-violet-500/25"
             >
-              <Eye className="w-4 h-4" />
-              View Details
+              <CreditCard className="w-4 h-4" />
+              Bulk Buy
             </button>
+          ) : (
+            /* Normal Actions */
+            !quiz.isFinal ? (
+              <>
+                <button
+                  onClick={() => navigate(`/tests/${quiz.id}/edit`)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => setFinalizeModal({ open: true, quiz })}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-500/20 text-violet-400 hover:bg-violet-500/30 transition-all text-sm font-medium"
+                >
+                  <Lock className="w-4 h-4" />
+                  Publish
+                </button>
+                <button
+                  onClick={() => setDeleteModal({ open: true, quiz })}
+                  className="flex items-center justify-center w-10 py-2.5 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate(`/tests/${quiz.id}/details`)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+                >
+                  <Eye className="w-4 h-4" />
+                  View Details
+                </button>
+                <button
+                  onClick={() => setAllocateModal({ open: true, quiz })}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-500/20 text-violet-400 hover:bg-violet-500/30 transition-all text-sm font-medium"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  Allocate
+                </button>
+              </>
+            )
           )}
         </div>
       </div>
@@ -190,6 +226,30 @@ const QuizList = () => {
           </Button>
         }
       />
+
+      {/* Tabs */}
+      <div className="flex p-1 mb-6 bg-slate-800/50 rounded-xl border border-white/5 w-fit">
+        <button
+          onClick={() => { setActiveTab('my_quizzes'); setPagination(prev => ({ ...prev, page: 0 })); }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'my_quizzes'
+              ? 'bg-slate-700 text-white shadow-sm'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          My Quizzes
+        </button>
+        <button
+          onClick={() => { setActiveTab('published_store'); setPagination(prev => ({ ...prev, page: 0 })); }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'published_store'
+              ? 'bg-violet-500 text-white shadow-sm'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          Published Store
+        </button>
+      </div>
 
       <div className="space-y-6">
         {/* Loading State */}
@@ -224,12 +284,18 @@ const QuizList = () => {
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-slate-800/50 flex items-center justify-center">
               <BookOpen className="w-10 h-10 text-gray-500" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">No quizzes yet</h3>
-            <p className="text-gray-400 mb-6">Create your first quiz to get started</p>
-            <Button variant="primary" onClick={() => navigate('/tests/new')}>
-              <Plus className="w-4 h-4" />
-              Create Quiz
-            </Button>
+            <h3 className="text-xl font-semibold text-white mb-2">No quizzes found</h3>
+            <p className="text-gray-400 mb-6">
+              {activeTab === 'published_store'
+                ? "There are no published quizzes available in the store yet."
+                : "Create your first quiz to get started"}
+            </p>
+            {activeTab === 'my_quizzes' && (
+              <Button variant="primary" onClick={() => navigate('/tests/new')}>
+                <Plus className="w-4 h-4" />
+                Create Quiz
+              </Button>
+            )}
           </div>
         )}
 
@@ -298,6 +364,17 @@ const QuizList = () => {
           ⚠️ Once published, the quiz cannot be edited or deleted.
         </p>
       </Modal>
+      {
+        allocateModal.open && (
+          <AllocateModal
+            isOpen={allocateModal.open}
+            onClose={() => setAllocateModal({ open: false, quiz: null })}
+            entityType="TEST"
+            entity={allocateModal.quiz}
+            onSuccess={() => setAllocateModal({ open: false, quiz: null })}
+          />
+        )
+      }
     </div>
   );
 };

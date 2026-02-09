@@ -47,6 +47,13 @@ export const API_ENDPOINTS = {
     GET_BY_ID: (id) => `/examinees/${id}`,
   },
 
+  // Groups
+  GROUPS: {
+    BASE: '/groups',
+    GET_BY_ID: (id) => `/groups/${id}`,
+    EXTRACT_EMAILS: '/groups/extract-emails',
+  },
+
   // Test Types & Templates
   TEST_TYPES: {
     BASE: '/test-types/types',
@@ -107,6 +114,13 @@ export const API_ENDPOINTS = {
     CREATE_ORDER: '/payments/create-order',
     CONFIG: '/payments/config',
     VERIFY: '/payments/verify',
+  },
+
+  // Allocations (Bulk Purchase)
+  ALLOCATIONS: {
+    BASE: '/allocations',
+    GET_BY_ID: (id) => `/allocations/${id}`,
+    VERIFY: '/allocations/verify',
   },
 
   // File Upload
