@@ -13,6 +13,7 @@ import {
     DollarSign,
     Tag
 } from 'lucide-react';
+import { STATUS, STATUS_LABELS } from '../constants/constants';
 
 const SeriesList = () => {
     const navigate = useNavigate();
@@ -50,11 +51,11 @@ const SeriesList = () => {
             <div className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:border-white/20 hover:bg-slate-800/70 transition-all duration-300 overflow-hidden">
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4 z-10">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${seriesItem.status === 4
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${seriesItem.status === STATUS.PUBLISHED
                         ? 'bg-emerald-500/20 text-emerald-400'
                         : 'bg-amber-500/20 text-amber-400'
                         }`}>
-                        {seriesItem.status === 4 ? 'Published' : 'Draft'}
+                        {STATUS_LABELS[seriesItem.status] || 'Unknown'}
                     </span>
                 </div>
 

@@ -21,6 +21,7 @@ import {
     Layers,
     Edit2
 } from 'lucide-react';
+import { STATUS, STATUS_LABELS } from '../constants/constants';
 
 const SeriesDetails = () => {
     const { id } = useParams();
@@ -35,6 +36,7 @@ const SeriesDetails = () => {
     const [addTestModalOpen, setAddTestModalOpen] = useState(false);
     const [editMetaModalOpen, setEditMetaModalOpen] = useState(false);
     const [publishModalOpen, setPublishModalOpen] = useState(false);
+    const [removeTestModal, setRemoveTestModal] = useState({ open: false, testId: null });
 
     // Add Test Logic State
     const [availableTests, setAvailableTests] = useState([]);
@@ -121,11 +123,16 @@ const SeriesDetails = () => {
     };
 
     // --- Remove Test Logic ---
-    const handleRemoveTest = async (testId) => {
-        if (!window.confirm("Are you sure you want to remove this test from the series?")) return;
+    const handleRemoveTest = (testId) => {
+        setRemoveTestModal({ open: true, testId });
+    };
+
+    const confirmRemoveTest = async () => {
+        if (!removeTestModal.testId) return;
         try {
-            await seriesApi.removeTestFromSeries(id, testId);
+            await seriesApi.removeTestFromSeries(id, removeTestModal.testId);
             toast.success("Test removed successfully");
+            setRemoveTestModal({ open: false, testId: null });
             fetchSeriesDetails();
         } catch (error) {
             console.error("Failed to remove test", error);
@@ -232,11 +239,18 @@ const SeriesDetails = () => {
                             <Edit2 className="w-4 h-4" />
                             Edit Details
                         </Button>
-                        {series.status !== 4 && ( // 4 = Published likely? 
-                            <Button variant="accent" onClick={() => setPublishModalOpen(true)}>
-                                <Check className="w-4 h-4" />
-                                Publish Series
-                            </Button>
+                        {series.status !== STATUS.PUBLISHED && (
+                            <div title={tests.some(t => !t.isPublished) ? "All tests must be published before publishing the series" : ""}>
+                                <Button
+                                    variant="accent"
+                                    onClick={() => setPublishModalOpen(true)}
+                                    disabled={tests.some(t => !t.isPublished)}
+                                    className={tests.some(t => !t.isPublished) ? "opacity-50 cursor-not-allowed" : ""}
+                                >
+                                    <Check className="w-4 h-4" />
+                                    Publish Series
+                                </Button>
+                            </div>
                         )}
                     </div>
                 }
@@ -271,10 +285,20 @@ const SeriesDetails = () => {
                                         <div className="flex items-center gap-4">
                                             <span className="text-gray-500 font-mono w-6 text-center">{index + 1}</span>
                                             <div>
-                                                <p className="font-medium text-white">{test.name}</p>
-                                                <p className="text-xs text-gray-400">
-                                                    {test.totalQuestions} Qs • {test.totalMarks} Marks • {test.durationMin} Mins
+                                                <p
+                                                    className="font-medium text-white hover:text-blue-400 cursor-pointer transition-colors"
+                                                    onClick={() => navigate(`/tests/${test.id}/details`)}
+                                                >
+                                                    {test.name}
                                                 </p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${test.isPublished ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border-amber-500/30 text-amber-400 bg-amber-500/10'}`}>
+                                                        {test.isPublished ? 'Published' : 'Draft'}
+                                                    </span>
+                                                    <p className="text-xs text-gray-400">
+                                                        {test.totalQuestions} Qs • {test.totalMarks} Marks • {test.durationMin} Mins
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -320,9 +344,9 @@ const SeriesDetails = () => {
                         <Card.Content className="space-y-4">
                             <div className="flex justify-between items-center py-2 border-b border-white/5">
                                 <span className="text-gray-400">Status</span>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${series.status === 4 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${series.status === STATUS.PUBLISHED ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
                                     }`}>
-                                    {series.status === 4 ? 'Published' : 'Draft'}
+                                    {STATUS_LABELS[series.status] || 'Unknown'}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center py-2 border-b border-white/5">
@@ -458,6 +482,21 @@ const SeriesDetails = () => {
             >
                 <p>Are you sure you want to publish this series? <br />
                     <span className="text-sm text-gray-400">It will become visible to users.</span></p>
+            </Modal>
+
+            {/* Remove Test Confirmation Modal */}
+            <Modal
+                isOpen={removeTestModal.open}
+                onClose={() => setRemoveTestModal({ open: false, testId: null })}
+                title="Remove Test"
+                footer={
+                    <>
+                        <Button variant="ghost" onClick={() => setRemoveTestModal({ open: false, testId: null })}>Cancel</Button>
+                        <Button variant="danger" onClick={confirmRemoveTest}>Remove</Button>
+                    </>
+                }
+            >
+                <p>Are you sure you want to remove this test from the series?</p>
             </Modal>
 
         </div>
