@@ -37,6 +37,10 @@ import {
   GroupForm,
   AllocationList,
   AllocationDetails,
+  // Series
+  SeriesList,
+  SeriesForm,
+  SeriesDetails,
   // Examinee
   ExamineeDashboard,
   TakeTest,
@@ -114,7 +118,13 @@ function App() {
                 {/* Allocations */}
                 <Route path="/allocations" element={<AllocationList />} />
                 <Route path="/allocations/:id" element={<AllocationDetails />} />
+                <Route path="/allocations/:id" element={<AllocationDetails />} />
                 <Route path="/groups/:id" element={<GroupForm />} />
+
+                {/* Series */}
+                <Route path="/series" element={<SeriesList />} />
+                <Route path="/series/new" element={<SeriesForm />} />
+                <Route path="/series/:id" element={<SeriesDetails />} />
 
                 {/* Questions */}
                 <Route path="/questions" element={<QuestionList />} />

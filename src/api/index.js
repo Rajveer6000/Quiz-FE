@@ -56,3 +56,7 @@ export { default as allocationsApi } from './allocationsApi';
 // Payments
 export * from './paymentsApi';
 export { default as paymentsApi } from './paymentsApi';
+
+// Series
+export * from './seriesApi';
+export { default as seriesApi } from './seriesApi';

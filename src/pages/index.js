@@ -42,6 +42,11 @@ export { default as GroupForm } from './GroupForm';
 export { default as AllocationList } from './AllocationList';
 export { default as AllocationDetails } from './AllocationDetails';
 
+// Staff pages - Series
+export { default as SeriesList } from './SeriesList';
+export { default as SeriesForm } from './SeriesForm';
+export { default as SeriesDetails } from './SeriesDetails';
+
 
 // Examinee pages
 export { default as ExamineeDashboard } from './ExamineeDashboard';
