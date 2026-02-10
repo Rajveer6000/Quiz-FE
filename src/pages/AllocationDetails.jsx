@@ -8,19 +8,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader, Card, Table, Button } from '../components/common';
 import { getAllocation, processAllocation } from '../api/allocationsApi';
 import {
-    ArrowLeft,
     CheckCircle,
     XCircle,
     Clock,
     Mail,
     CreditCard,
     FileText,
-    Download,
     Users,
     RefreshCw
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import { STATUS, STATUS_LABELS } from '../constants/constants';
+// import { STATUS, STATUS_LABELS } from '../constants/constants';
 
 const AllocationDetails = () => {
     const { id } = useParams();
@@ -66,7 +64,7 @@ const AllocationDetails = () => {
     };
 
     const StatusBadge = ({ status, errorMessage }) => {
-        if (status === STATUS.COMPLETED || status === 11) {
+        if (status === 'COMPLETED' || status === 11 || status === 'SUCCESS') {
             return (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">
                     <CheckCircle className="w-3 h-3" />
@@ -74,7 +72,7 @@ const AllocationDetails = () => {
                 </span>
             );
         }
-        if (status === STATUS.FAILED || status === 12) {
+        if (status === 'FAILED' || status === 12) {
             return (
                 <div className="flex flex-col items-start gap-1">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">
@@ -87,7 +85,7 @@ const AllocationDetails = () => {
         return (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400">
                 <Clock className="w-3 h-3" />
-                {STATUS_LABELS[status] || 'Pending'}
+                {status === 10 ? 'Pending' : (status === 13 ? 'Already Has Access' : (status === 14 ? 'Duplicate' : 'Pending'))}
             </span>
         );
     };
@@ -112,7 +110,7 @@ const AllocationDetails = () => {
             key: 'message',
             label: 'Details',
             render: (row) => {
-                if (row.status === STATUS.COMPLETED || row.status === 11) {
+                if (row.status === 'COMPLETED' || row.status === 11 || row.status === 'SUCCESS') {
                     return <span className="text-xs text-emerald-400">User added successfully</span>;
                 }
                 return <span className="text-xs text-slate-400">{row.errorMessage || '-'}</span>;
@@ -140,7 +138,7 @@ const AllocationDetails = () => {
         );
     }
 
-    const hasFailures = allocation.members?.some(m => m.status === STATUS.FAILED || m.status === STATUS.PENDING || m.status === 12 || m.status === 10);
+    const hasFailures = allocation.members?.some(m => m.status === 'FAILED' || m.status === 12 || m.status === 10 || m.status === 'PENDING');
 
     return (
         <div className="space-y-6">
