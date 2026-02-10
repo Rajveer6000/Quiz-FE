@@ -49,6 +49,8 @@ import {
   TestStartPage,
   Results,
   History,
+  ExamineeSeriesList,
+  ExamineeSeriesDetails,
 } from './pages';
 
 // Component to wire loading callbacks
@@ -149,6 +151,8 @@ function App() {
                 <Route path="/examinee" element={<ExamineeDashboard />} />
                 <Route path="/examinee/profile" element={<Profile />} />
                 <Route path="/examinee/tests" element={<TakeTest />} />
+                <Route path="/examinee/series" element={<ExamineeSeriesList />} />
+                <Route path="/examinee/series/:id" element={<ExamineeSeriesDetails />} />
                 <Route path="/attempt/dummy/:quizId" element={<DummyTestAttempt />} />
                 <Route path="/examinee/history" element={<History />} />
                 <Route path="/examinee/results/:attemptId" element={<Results />} />

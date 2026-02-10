@@ -84,6 +84,7 @@ const Sidebar = () => {
   const examineeMenuItems = [
     { path: '/examinee', icon: LayoutDashboard, label: 'Dashboard', visible: true },
     { path: '/examinee/tests', icon: BookOpen, label: 'Available Quizzes', visible: true },
+    { path: '/examinee/series', icon: Layers, label: 'Series', visible: true },
     { path: '/examinee/history', icon: ClipboardList, label: 'My Attempts', visible: true },
   ];
 

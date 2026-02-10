@@ -68,6 +68,25 @@ const seriesApi = {
   publishSeries: async (id) => {
     const response = await api.post(`/series/admin/${id}/publish`);
     return normalizeResponse(response);
+  },
+
+  // Examinee: list published series
+  getSeriesCatalog: async (params = {}) => {
+    const response = await api.get('/series', {
+      params: {
+        page: params.page ?? params.pageNo ?? 0,
+        limit: params.limit ?? params.pageSize ?? 10,
+        search: params.search,
+        status: params.status
+      }
+    });
+    return normalizeResponse(response);
+  },
+
+  // Examinee: get series details
+  getSeriesDetailsPublic: async (id) => {
+    const response = await api.get(`/series/${id}`);
+    return normalizeResponse(response);
   }
 };
 
