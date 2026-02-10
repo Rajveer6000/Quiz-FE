@@ -282,3 +282,38 @@ export const USER_STATUS = {
   ACTIVE: 1,
   INACTIVE: 0,
 };
+
+// =============================================================================
+// GLOBAL STATUS
+// =============================================================================
+export const STATUS = {
+  ACTIVE: 1,
+  INACTIVE: 2,
+  DELETED: 3,
+  DRAFT: 4,
+  PUBLISHED: 5,
+  INVITED: 6,
+  REMOVED: 7,
+  // Allocation Member Status
+  PENDING: 10,
+  COMPLETED: 11,
+  FAILED: 12,
+  ALREADY_HAS_ACCESS: 13,
+  DUPLICATE_IN_REQUEST: 14,
+};
+
+export const STATUS_LABELS = {
+  [STATUS.ACTIVE]: 'Active',
+  [STATUS.INACTIVE]: 'Inactive',
+  [STATUS.DELETED]: 'Deleted',
+  [STATUS.DRAFT]: 'Draft',
+  [STATUS.PUBLISHED]: 'Published',
+  [STATUS.INVITED]: 'Invited',
+  [STATUS.REMOVED]: 'Removed',
+  // Allocation Labels
+  [STATUS.PENDING]: 'Pending',
+  [STATUS.COMPLETED]: 'Completed',
+  [STATUS.FAILED]: 'Failed',
+  [STATUS.ALREADY_HAS_ACCESS]: 'Already Has Access',
+  [STATUS.DUPLICATE_IN_REQUEST]: 'Duplicate in Request',
+};

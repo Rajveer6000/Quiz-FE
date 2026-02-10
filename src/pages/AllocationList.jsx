@@ -17,6 +17,7 @@ import {
     XCircle,
     FileText
 } from 'lucide-react';
+import { STATUS, STATUS_LABELS } from '../constants/constants';
 
 const AllocationList = () => {
     const navigate = useNavigate();

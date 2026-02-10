@@ -169,6 +169,13 @@ const QuizList = () => {
             !quiz.isFinal ? (
               <>
                 <button
+                  onClick={() => navigate(`/tests/${quiz.id}/details`)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+                >
+                  <Eye className="w-4 h-4" />
+                  View Details
+                </button>
+                <button
                   onClick={() => navigate(`/tests/${quiz.id}/edit`)}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
                 >
@@ -232,8 +239,8 @@ const QuizList = () => {
         <button
           onClick={() => { setActiveTab('my_quizzes'); setPagination(prev => ({ ...prev, page: 0 })); }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'my_quizzes'
-              ? 'bg-slate-700 text-white shadow-sm'
-              : 'text-gray-400 hover:text-white hover:bg-white/5'
+            ? 'bg-slate-700 text-white shadow-sm'
+            : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
         >
           <BookOpen className="w-4 h-4" />
@@ -242,8 +249,8 @@ const QuizList = () => {
         <button
           onClick={() => { setActiveTab('published_store'); setPagination(prev => ({ ...prev, page: 0 })); }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'published_store'
-              ? 'bg-violet-500 text-white shadow-sm'
-              : 'text-gray-400 hover:text-white hover:bg-white/5'
+            ? 'bg-violet-500 text-white shadow-sm'
+            : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}
         >
           <CreditCard className="w-4 h-4" />

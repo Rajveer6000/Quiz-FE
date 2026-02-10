@@ -37,6 +37,10 @@ import {
   GroupForm,
   AllocationList,
   AllocationDetails,
+  // Series
+  SeriesList,
+  SeriesForm,
+  SeriesDetails,
   // Examinee
   ExamineeDashboard,
   TakeTest,
@@ -45,6 +49,8 @@ import {
   TestStartPage,
   Results,
   History,
+  ExamineeSeriesList,
+  ExamineeSeriesDetails,
 } from './pages';
 
 // Component to wire loading callbacks
@@ -114,7 +120,13 @@ function App() {
                 {/* Allocations */}
                 <Route path="/allocations" element={<AllocationList />} />
                 <Route path="/allocations/:id" element={<AllocationDetails />} />
+                <Route path="/allocations/:id" element={<AllocationDetails />} />
                 <Route path="/groups/:id" element={<GroupForm />} />
+
+                {/* Series */}
+                <Route path="/series" element={<SeriesList />} />
+                <Route path="/series/new" element={<SeriesForm />} />
+                <Route path="/series/:id" element={<SeriesDetails />} />
 
                 {/* Questions */}
                 <Route path="/questions" element={<QuestionList />} />
@@ -139,6 +151,8 @@ function App() {
                 <Route path="/examinee" element={<ExamineeDashboard />} />
                 <Route path="/examinee/profile" element={<Profile />} />
                 <Route path="/examinee/tests" element={<TakeTest />} />
+                <Route path="/examinee/series" element={<ExamineeSeriesList />} />
+                <Route path="/examinee/series/:id" element={<ExamineeSeriesDetails />} />
                 <Route path="/attempt/dummy/:quizId" element={<DummyTestAttempt />} />
                 <Route path="/examinee/history" element={<History />} />
                 <Route path="/examinee/results/:attemptId" element={<Results />} />
