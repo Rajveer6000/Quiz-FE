@@ -11,15 +11,21 @@ import {
     Layers,
     Calendar,
     DollarSign,
-    Tag
+    Tag,
+    CreditCard,
+    CheckCircle,
+    AlertCircle
 } from 'lucide-react';
 import { STATUS, STATUS_LABELS } from '../constants/constants';
+import { AllocateModal } from '../components/quiz';
 
 const SeriesList = () => {
     const navigate = useNavigate();
     const [series, setSeries] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({ page: 0, pageSize: 10, total: 0 });
+    const [activeTab, setActiveTab] = useState('my_series'); // 'my_series' | 'published_store'
+    const [allocateModal, setAllocateModal] = useState({ open: false, series: null });
 
     const fetchSeries = async () => {
         setLoading(true);
@@ -27,8 +33,12 @@ const SeriesList = () => {
             const params = {
                 pageNo: pagination.page,
                 pageSize: pagination.pageSize,
-                // status: 'DRAFT' // Optional: if we want to filter by default
             };
+
+            // Filter based on active tab
+            if (activeTab === 'published_store') {
+                params.status = STATUS.PUBLISHED;
+            }
 
             const response = await seriesApi.getSeriesList(params);
             if (response.success && response.data?.list) {
@@ -44,19 +54,26 @@ const SeriesList = () => {
 
     useEffect(() => {
         fetchSeries();
-    }, [pagination.page]);
+    }, [pagination.page, activeTab]);
 
     const SeriesCard = ({ seriesItem }) => {
+        const isPublishedStore = activeTab === 'published_store';
+
         return (
             <div className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:border-white/20 hover:bg-slate-800/70 transition-all duration-300 overflow-hidden">
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4 z-10">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${seriesItem.status === STATUS.PUBLISHED
-                        ? 'bg-emerald-500/20 text-emerald-400'
-                        : 'bg-amber-500/20 text-amber-400'
-                        }`}>
-                        {STATUS_LABELS[seriesItem.status] || 'Unknown'}
-                    </span>
+                    {seriesItem.status === STATUS.PUBLISHED ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">
+                            <CheckCircle className="w-3 h-3" />
+                            Published
+                        </span>
+                    ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
+                            <AlertCircle className="w-3 h-3" />
+                            {STATUS_LABELS[seriesItem.status] || 'Draft'}
+                        </span>
+                    )}
                 </div>
 
                 {/* Series Info */}
@@ -108,13 +125,34 @@ const SeriesList = () => {
 
                 {/* Actions */}
                 <div className="flex gap-2 mt-5 pt-5 border-t border-white/5">
-                    <button
-                        onClick={() => navigate(`/series/${seriesItem.id}`)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
-                    >
-                        <Eye className="w-4 h-4" />
-                        View Details
-                    </button>
+                    {isPublishedStore ? (
+                        <button
+                            onClick={() => setAllocateModal({ open: true, series: seriesItem })}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-500 text-white hover:bg-violet-600 transition-all text-sm font-bold shadow-lg shadow-violet-500/25"
+                        >
+                            <CreditCard className="w-4 h-4" />
+                            Bulk Buy
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                onClick={() => navigate(`/series/${seriesItem.id}`)}
+                                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+                            >
+                                <Eye className="w-4 h-4" />
+                                View Details
+                            </button>
+                            {seriesItem.status === STATUS.PUBLISHED && (
+                                <button
+                                    onClick={() => setAllocateModal({ open: true, series: seriesItem })}
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-violet-500/20 text-violet-400 hover:bg-violet-500/30 transition-all text-sm font-medium"
+                                >
+                                    <CreditCard className="w-4 h-4" />
+                                    Allocate
+                                </button>
+                            )}
+                        </>
+                    )}
                 </div>
             </div>
         );
@@ -133,6 +171,31 @@ const SeriesList = () => {
                     </Button>
                 }
             />
+
+            {/* Tabs */}
+            <div className="flex p-1 mb-6 bg-slate-800/50 rounded-xl border border-white/5 w-fit">
+                <button
+                    onClick={() => { setActiveTab('my_series'); setPagination(prev => ({ ...prev, page: 0 })); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'my_series'
+                        ? 'bg-slate-700 text-white shadow-sm'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <Layers className="w-4 h-4" />
+                    My Series
+                </button>
+                <button
+                    onClick={() => { setActiveTab('published_store'); setPagination(prev => ({ ...prev, page: 0 })); }}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'published_store'
+                        ? 'bg-violet-500 text-white shadow-sm'
+                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <CreditCard className="w-4 h-4" />
+                    Published Store
+                </button>
+            </div>
+
 
             <div className="space-y-6">
                 {/* Loading State */}
@@ -167,11 +230,17 @@ const SeriesList = () => {
                             <Layers className="w-10 h-10 text-gray-500" />
                         </div>
                         <h3 className="text-xl font-semibold text-white mb-2">No series found</h3>
-                        <p className="text-gray-400 mb-6">Create your first test series to get started</p>
-                        <Button variant="primary" onClick={() => navigate('/series/new')}>
-                            <Plus className="w-4 h-4" />
-                            Create Series
-                        </Button>
+                        <p className="text-gray-400 mb-6">
+                            {activeTab === 'published_store'
+                                ? 'There are no published series available in the store yet.'
+                                : 'Create your first test series to get started'}
+                        </p>
+                        {activeTab === 'my_series' && (
+                            <Button variant="primary" onClick={() => navigate('/series/new')}>
+                                <Plus className="w-4 h-4" />
+                                Create Series
+                            </Button>
+                        )}
                     </div>
                 )}
 
@@ -198,6 +267,16 @@ const SeriesList = () => {
                     </div>
                 )}
             </div>
+
+            {allocateModal.open && (
+                <AllocateModal
+                    isOpen={allocateModal.open}
+                    onClose={() => setAllocateModal({ open: false, series: null })}
+                    entityType="SERIES"
+                    entity={allocateModal.series}
+                    onSuccess={() => setAllocateModal({ open: false, series: null })}
+                />
+            )}
         </div>
     );
 };
