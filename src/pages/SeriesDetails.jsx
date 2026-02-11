@@ -23,6 +23,91 @@ import {
 } from 'lucide-react';
 import { STATUS, STATUS_LABELS } from '../constants/constants';
 
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+    useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const SortableTestItem = ({ test, index, onRemove, onNavigate, disabled }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({
+        id: test.id,
+        disabled: disabled
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 50 : 'auto',
+        position: 'relative',
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group hover:border-white/10 transition-all ${isDragging ? 'bg-white/10 shadow-xl border-blue-500/50 cursor-grabbing' : ''}`}
+        >
+            <div className="flex items-center gap-4 flex-1">
+                {!disabled && (
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        className="cursor-grab active:cursor-grabbing p-1 text-gray-500 hover:text-white transition-colors"
+                    >
+                        <LayoutList className="w-4 h-4" />
+                    </div>
+                )}
+                <span className="text-gray-500 font-mono w-6 text-center">{index + 1}</span>
+                <div className="flex-1">
+                    <p
+                        className="font-medium text-white hover:text-blue-400 cursor-pointer transition-colors"
+                        onClick={() => onNavigate(test.id)}
+                    >
+                        {test.name}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded border ${test.isPublished ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border-amber-500/30 text-amber-400 bg-amber-500/10'}`}>
+                            {test.isPublished ? 'Published' : 'Draft'}
+                        </span>
+                        <p className="text-xs text-gray-400">
+                            {test.totalQuestions} Qs • {test.totalMarks} Marks • {test.durationMin} Mins
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                {!disabled && (
+                    <button
+                        onClick={() => onRemove(test.id)}
+                        className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const SeriesDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -31,6 +116,20 @@ const SeriesDetails = () => {
     const [series, setSeries] = useState(null);
     const [loading, setLoading] = useState(true);
     const [tests, setTests] = useState([]); // Tests within the series
+    const [originalTestIds, setOriginalTestIds] = useState([]);
+    const [savingOrder, setSavingOrder] = useState(false);
+
+    // Sensors for DND
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Enable drag after moving 8px
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     // Modal States
     const [addTestModalOpen, setAddTestModalOpen] = useState(false);
@@ -65,6 +164,7 @@ const SeriesDetails = () => {
                     seriesTestId: item.id
                 }));
                 setTests(mappedTests);
+                setOriginalTestIds(mappedTests.map(t => t.id));
             }
         } catch (error) {
             console.error("Failed to fetch series details", error);
@@ -140,42 +240,41 @@ const SeriesDetails = () => {
         }
     };
 
-    // --- Reorder Logic (Simple Move Up/Down) ---
-    const handleMove = async (index, direction) => {
-        if (direction === 'up' && index === 0) return;
-        if (direction === 'down' && index === tests.length - 1) return;
+    // --- Reorder Logic (DND) ---
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
 
-        const newTests = [...tests];
-        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        if (active && over && active.id !== over.id) {
+            const oldIndex = tests.findIndex((t) => t.id === active.id);
+            const newIndex = tests.findIndex((t) => t.id === over.id);
 
-        // Swap
-        [newTests[index], newTests[targetIndex]] = [newTests[targetIndex], newTests[index]];
-
-        // Optimistic update
-        setTests(newTests);
-
-        // Call API
-        try {
-            const orderedIds = newTests.map(t => t.id);
-            await seriesApi.reorderTestsInSeries(id, orderedIds);
-            // Don't need to refresh if successful, optimistic update holds
-        } catch (error) {
-            console.error("Failed to reorder", error);
-            toast.error("Failed to reorder tests");
-            fetchSeriesDetails(); // Revert
+            setTests((items) => arrayMove(items, oldIndex, newIndex));
         }
     };
+
+    const handleSaveOrder = async () => {
+        setSavingOrder(true);
+        try {
+            const orderedIds = tests.map(t => t.id);
+            await seriesApi.reorderTestsInSeries(id, orderedIds);
+            toast.success("Order saved successfully");
+            setOriginalTestIds(orderedIds);
+        } catch (error) {
+            console.error("Failed to save order", error);
+            toast.error("Failed to save order");
+            // Optionally revert: fetchSeriesDetails();
+        } finally {
+            setSavingOrder(false);
+        }
+    };
+
+    const isOrderChanged = JSON.stringify(tests.map(t => t.id)) !== JSON.stringify(originalTestIds);
 
     // --- Edit Metadata Logic ---
     const openEditModal = () => {
         setEditFormData({
-            title: series.name, // API assumes `name` but prompt said `title` in payload? Let's check api. series object usually has `name`.
-            // Update: The Create API used `title`, but GET likely returns `name`. 
-            // Let's map it. 
+            title: series.name,
             description: series.description,
-            // Prices might be in series object directly
-            listingPrice: series.listPrice, // check response key
-            offerPrice: series.offerPrice
         });
         setEditMetaModalOpen(true);
     };
@@ -186,17 +285,8 @@ const SeriesDetails = () => {
             const payload = {
                 title: editFormData.title,
                 description: editFormData.description,
-                // listPrice vs listingPrice? API doc said `listingPrice` in POST, assume same for PATCH
-                // Wait, GET response showed `name`, `listPrice`, `offerPrice`.
-                // PATCH example showed just `title`, `description`. 
-                // Assuming we can update prices too? The prompt didn't explicitly show price update in PATCH example, but typically yes.
-                // I'll include them.
-                // NOTE: The PATCH example payload: {"title": "...", "description": "..."}
-                // It didn't show price. But usually admin can update price. I'll add it.
             };
-            // Only add if changed/present
-            if (editFormData.listingPrice) payload.listingPrice = Number(editFormData.listingPrice);
-            if (editFormData.offerPrice) payload.offerPrice = Number(editFormData.offerPrice);
+
 
             await seriesApi.updateSeries(id, payload);
             toast.success("Series updated successfully");
@@ -272,66 +362,56 @@ const SeriesDetails = () => {
                         <Card.Header>
                             <div className="flex justify-between items-center">
                                 <Card.Title>Tests in Series ({tests.length})</Card.Title>
-                                <Button size="sm" onClick={() => setAddTestModalOpen(true)}>
-                                    <Plus className="w-4 h-4" />
-                                    Add Tests
-                                </Button>
+                                <div className="flex gap-2">
+                                    {isOrderChanged && series.status === STATUS.DRAFT && (
+                                        <Button
+                                            size="sm"
+                                            variant="primary"
+                                            onClick={handleSaveOrder}
+                                            isLoading={savingOrder}
+                                        >
+                                            <Save className="w-4 h-4" />
+                                            Save Order
+                                        </Button>
+                                    )}
+                                    {series.status === STATUS.DRAFT && (
+                                        <Button size="sm" variant="outline" onClick={() => setAddTestModalOpen(true)}>
+                                            <Plus className="w-4 h-4" />
+                                            Add Tests
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         </Card.Header>
                         <Card.Content>
-                            <div className="space-y-2">
-                                {tests.map((test, index) => (
-                                    <div key={test.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group hover:border-white/10 transition-all">
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-gray-500 font-mono w-6 text-center">{index + 1}</span>
-                                            <div>
-                                                <p
-                                                    className="font-medium text-white hover:text-blue-400 cursor-pointer transition-colors"
-                                                    onClick={() => navigate(`/tests/${test.id}/details`)}
-                                                >
-                                                    {test.name}
-                                                </p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${test.isPublished ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border-amber-500/30 text-amber-400 bg-amber-500/10'}`}>
-                                                        {test.isPublished ? 'Published' : 'Draft'}
-                                                    </span>
-                                                    <p className="text-xs text-gray-400">
-                                                        {test.totalQuestions} Qs • {test.totalMarks} Marks • {test.durationMin} Mins
-                                                    </p>
-                                                </div>
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <SortableContext
+                                    items={tests.map(t => t.id)}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    <div className="space-y-2">
+                                        {tests.map((test, index) => (
+                                            <SortableTestItem
+                                                key={test.id}
+                                                test={test}
+                                                index={index}
+                                                disabled={series.status !== STATUS.DRAFT}
+                                                onRemove={handleRemoveTest}
+                                                onNavigate={(testId) => navigate(`/tests/${testId}/details`)}
+                                            />
+                                        ))}
+                                        {tests.length === 0 && (
+                                            <div className="text-center py-8 text-gray-500 italic">
+                                                No tests in this series. Add some!
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button
-                                                onClick={() => handleMove(index, 'up')}
-                                                disabled={index === 0}
-                                                className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg disabled:opacity-30"
-                                            >
-                                                <ArrowUp className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleMove(index, 'down')}
-                                                disabled={index === tests.length - 1}
-                                                className="p-1.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg disabled:opacity-30"
-                                            >
-                                                <ArrowDown className="w-4 h-4" />
-                                            </button>
-                                            <div className="w-px h-4 bg-white/10 mx-1" />
-                                            <button
-                                                onClick={() => handleRemoveTest(test.id)}
-                                                className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
+                                        )}
                                     </div>
-                                ))}
-                                {tests.length === 0 && (
-                                    <div className="text-center py-8 text-gray-500 italic">
-                                        No tests in this series. Add some!
-                                    </div>
-                                )}
-                            </div>
+                                </SortableContext>
+                            </DndContext>
                         </Card.Content>
                     </Card>
                 </div>
@@ -449,20 +529,6 @@ const SeriesDetails = () => {
                             className="input min-h-24 w-full"
                             value={editFormData.description || ''}
                             onChange={(e) => setEditFormData(p => ({ ...p, description: e.target.value }))}
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Input
-                            label="Listing Price"
-                            type="number"
-                            value={editFormData.listingPrice || ''}
-                            onChange={e => setEditFormData(p => ({ ...p, listingPrice: e.target.value }))}
-                        />
-                        <Input
-                            label="Offer Price"
-                            type="number"
-                            value={editFormData.offerPrice || ''}
-                            onChange={e => setEditFormData(p => ({ ...p, offerPrice: e.target.value }))}
                         />
                     </div>
                 </div>
