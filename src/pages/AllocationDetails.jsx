@@ -15,7 +15,8 @@ import {
     CreditCard,
     FileText,
     Users,
-    RefreshCw
+    RefreshCw,
+    ArrowLeft
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 // import { STATUS, STATUS_LABELS } from '../constants/constants';
@@ -64,11 +65,11 @@ const AllocationDetails = () => {
     };
 
     const StatusBadge = ({ status, errorMessage }) => {
-        if (status === 'COMPLETED' || status === 11 || status === 'SUCCESS') {
+        if (status === 'COMPLETED' || status === 11 || status === 'SUCCESS' || status === 'ACTIVE' || status === 1) {
             return (
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">
                     <CheckCircle className="w-3 h-3" />
-                    Success
+                    {status === 1 || status === 'ACTIVE' ? 'Active' : 'Success'}
                 </span>
             );
         }
@@ -77,7 +78,7 @@ const AllocationDetails = () => {
                 <div className="flex flex-col items-start gap-1">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400">
                         <XCircle className="w-3 h-3" />
-                        Failed
+                        {errorMessage || 'Failed'}
                     </span>
                 </div>
             );
@@ -85,7 +86,9 @@ const AllocationDetails = () => {
         return (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400">
                 <Clock className="w-3 h-3" />
-                {status === 10 ? 'Pending' : (status === 13 ? 'Already Has Access' : (status === 14 ? 'Duplicate' : 'Pending'))}
+                {status === 10 || status === 'PENDING' ? 'Pending' :
+                    status === 13 || status === 'ALREADY_HAS_ACCESS' ? 'Already Has Access' :
+                        status === 14 || status === 'DUPLICATE' ? 'Duplicate' : 'Processing'}
             </span>
         );
     };
