@@ -4,7 +4,8 @@
 // =============================================================================
 
 // export const API_BASE_URL = 'http://localhost:8080/api/v1';
-export const API_BASE_URL = 'https://quiz-dev.up.railway.app/api/v1';
+// export const API_BASE_URL = 'https://quiz-dev.up.railway.app/api/v1';
+export const API_BASE_URL = 'https://backend-production-806b.up.railway.app/api/v1';
 // =============================================================================
 // API ENDPOINTS
 // =============================================================================
