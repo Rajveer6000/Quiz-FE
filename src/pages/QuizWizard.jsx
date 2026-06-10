@@ -172,6 +172,25 @@ const QuizWizard = () => {
     const handleCreate = async () => {
         if (!validateStep(currentStep)) return;
 
+        if (quizType === 'template') {
+            if (!selectedTemplate) {
+                toast.error('Please select a template');
+                return;
+            }
+            if (templateSections.length === 0) {
+                toast.error('Selected template has no sections. Choose another template or use Custom.');
+                return;
+            }
+        }
+
+        if (quizType === 'custom') {
+            const validSections = customSections.filter((s) => s.sectionName?.trim());
+            if (validSections.length === 0) {
+                toast.error('Custom tests require at least one section with a name');
+                return;
+            }
+        }
+
         setCreating(true);
         try {
             const payload = {
@@ -192,8 +211,9 @@ const QuizWizard = () => {
                 payload.templateId = selectedTemplate;
             }
 
-            if (quizType === 'custom' && customSections.length > 0) {
-                payload.sections = customSections.map((section, index) => ({
+            if (quizType === 'custom') {
+                const validSections = customSections.filter((s) => s.sectionName?.trim());
+                payload.sections = validSections.map((section, index) => ({
                     sectionName: section.sectionName,
                     subjectName: section.subjectName || section.sectionName,
                     questionCount: section.questionCount,

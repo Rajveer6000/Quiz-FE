@@ -4,8 +4,8 @@
 // =============================================================================
 
 // export const API_BASE_URL = 'http://localhost:8080/api/v1';
-// export const API_BASE_URL = 'https://quiz-dev.up.railway.app/api/v1';
-export const API_BASE_URL = 'https://backend-production-806b.up.railway.app/api/v1';
+export const API_BASE_URL = 'https://quiz-dev.up.railway.app/api/v1';
+// export const API_BASE_URL = 'https://backend-production-806b.up.railway.app/api/v1';
 // =============================================================================
 // API ENDPOINTS
 // =============================================================================
@@ -17,6 +17,10 @@ export const API_ENDPOINTS = {
     REFRESH: '/login/refresh',
     REFRESH_EXAMINEE: '/login/examinee/refresh',
     PROFILE: '/profile',
+  },
+
+  PROFILE: {
+    BASE: '/profile',
   },
 
   // Organizations
@@ -46,6 +50,12 @@ export const API_ENDPOINTS = {
     REGISTER: '/examinees/register',
     INVITATIONS: '/examinees/invitations',
     GET_BY_ID: (id) => `/examinees/${id}`,
+  },
+
+  // Students (richer examinee analytics)
+  STUDENTS: {
+    BASE: '/students',
+    GET_BY_ID: (id) => `/students/${id}`,
   },
 
   // Groups
@@ -101,6 +111,7 @@ export const API_ENDPOINTS = {
     UPDATE_QUESTION: (testId, questionId) => `/tests/${testId}/questions/${questionId}`,
     FINALIZE: (testId) => `/tests/${testId}/finalize`,
     AVAILABLE: '/tests/available',
+    FORMATS: '/tests/formats',
   },
 
   // Purchases
@@ -135,6 +146,14 @@ export const API_ENDPOINTS = {
     EXAMINEE_STATS: '/dashboard/examinee/stats',
     EXAMINEE_GRAPH: '/dashboard/examinee/graph',
     PAUSED_TESTS: '/dashboard/examinee/paused-tests',
+    CREATOR_OVERVIEW: '/dashboard/creator/overview',
+    CREATOR_SUMMARY: '/dashboard/creator/summary',
+    CREATOR_REVENUE: '/dashboard/creator/revenue',
+    CREATOR_NEW_STUDENTS: '/dashboard/creator/students/new',
+    CREATOR_TESTS_PERFORMANCE: '/dashboard/creator/tests/performance',
+    CREATOR_CATEGORIES: '/dashboard/creator/categories/distribution',
+    CREATOR_TOP_TESTS: '/dashboard/creator/tests/top',
+    CREATOR_RECENT_PURCHASES: '/dashboard/creator/purchases/recent',
   },
 };
 

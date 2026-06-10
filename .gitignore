@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+pnpm-lock.yaml
+pnpm-workspace.yaml
+
+# Agent / graphify generated output
+graphify-out/
+raw/
+
+# Cursor agent local state (if created in-repo)
+.cursor/

@@ -45,6 +45,22 @@ export { default as questionTypesApi } from './questionTypesApi';
 export * from './dashboardApi';
 export { default as dashboardApi } from './dashboardApi';
 
+// Creator Dashboard
+export * from './creatorDashboardApi';
+export { default as creatorDashboardApi } from './creatorDashboardApi';
+
+// Profile
+export * from './profileApi';
+export { default as profileApi } from './profileApi';
+
+// Students
+export * from './studentsApi';
+export { default as studentsApi } from './studentsApi';
+
+// Test Formats
+export * from './testFormatsApi';
+export { default as testFormatsApi } from './testFormatsApi';
+
 // Groups
 export * from './groupsApi';
 export { default as groupsApi } from './groupsApi';

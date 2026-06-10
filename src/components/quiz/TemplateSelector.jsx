@@ -5,7 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { LayoutTemplate, BookOpen, ChevronRight, Users, Clock, HelpCircle } from 'lucide-react';
-import { getTestTypes, getTemplatesByType, getTemplateSections } from '../../api/testsApi';
+import { getTemplateSections } from '../../api/testsApi';
+import { listTestFormats } from '../../api/testFormatsApi';
 
 const TemplateSelector = ({ selectedTemplate, onSelect }) => {
     const [testTypes, setTestTypes] = useState([]);
@@ -21,12 +22,15 @@ const TemplateSelector = ({ selectedTemplate, onSelect }) => {
         fetchTestTypes();
     }, []);
 
-    // Fetch templates when type is selected
+    // Load templates when type is selected (from cached formats)
     useEffect(() => {
         if (selectedType) {
-            fetchTemplates(selectedType);
+            setLoadingTemplates(true);
+            const format = testTypes.find((t) => t.id === selectedType);
+            setTemplates(format?.templates || []);
+            setLoadingTemplates(false);
         }
-    }, [selectedType]);
+    }, [selectedType, testTypes]);
 
     // Fetch sections when template is selected
     useEffect(() => {
@@ -37,28 +41,14 @@ const TemplateSelector = ({ selectedTemplate, onSelect }) => {
 
     const fetchTestTypes = async () => {
         try {
-            const response = await getTestTypes();
+            const response = await listTestFormats();
             if (response.success) {
-                setTestTypes(response.data?.list || []);
+                setTestTypes(response.data?.formats || []);
             }
         } catch (error) {
-            console.error('Failed to fetch test types:', error);
+            console.error('Failed to fetch test formats:', error);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const fetchTemplates = async (typeId) => {
-        setLoadingTemplates(true);
-        try {
-            const response = await getTemplatesByType(typeId);
-            if (response.success) {
-                setTemplates(response.data?.list || []);
-            }
-        } catch (error) {
-            console.error('Failed to fetch templates:', error);
-        } finally {
-            setLoadingTemplates(false);
         }
     };
 

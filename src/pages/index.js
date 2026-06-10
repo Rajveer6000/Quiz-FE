@@ -33,6 +33,7 @@ export { default as RoleForm } from './RoleForm';
 
 // Staff pages - Examinees
 export { default as ExamineeList } from './ExamineeList';
+export { default as StudentDetail } from './StudentDetail';
 
 // Staff pages - Groups
 export { default as GroupList } from './GroupList';
