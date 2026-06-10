@@ -30,10 +30,14 @@ const normalizeResponse = (response) => {
 };
 
 /**
- * List tests with pagination
+ * List tests with pagination and optional search/stats
  * @param {Object} [params] - Query parameters
- * @param {number} [params.pageNo=0] - Page number
+ * @param {number} [params.pageNo=0] - Page number (0-based)
  * @param {number} [params.pageSize=10] - Page size
+ * @param {string} [params.sortOrder] - ASC | DESC
+ * @param {boolean} [params.isFinal] - Filter published (true) or draft (false)
+ * @param {string} [params.search] - Search name or description (alias: searchTerm)
+ * @param {boolean} [params.withStats] - Include students, revenue, avgScore (My Tests)
  * @returns {Promise} Response with paginated test list
  */
 export const listTests = async (params = {}) => {

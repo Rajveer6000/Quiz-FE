@@ -92,7 +92,17 @@ const TestForm = () => {
 
       if (formData.startTime) payload.startTime = new Date(formData.startTime).toISOString();
       if (formData.endTime) payload.endTime = new Date(formData.endTime).toISOString();
-      if (formData.templateId) payload.templateId = parseInt(formData.templateId);
+      if (formData.templateId) {
+        payload.templateId = parseInt(formData.templateId, 10);
+      } else if (!isEditing) {
+        payload.sections = [{
+          sectionName: 'Section 1',
+          sectionOrder: 1,
+          questionCount: 0,
+          marksPerQuestion: 1,
+          negativeMarksPerQuestion: 0,
+        }];
+      }
 
       if (isEditing) {
         await updateTest(id, payload);
