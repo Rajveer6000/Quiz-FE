@@ -60,3 +60,6 @@ export { default as TestStartPage } from './TestStartPage';
 export { default as ExamineeSeriesList } from './ExamineeSeriesList';
 export { default as ExamineeSeriesDetails } from './ExamineeSeriesDetails';
 
+// Admin dev tools
+export { default as SeedTestQuestions } from './SeedTestQuestions';
+

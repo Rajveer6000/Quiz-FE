@@ -52,6 +52,7 @@ import {
   History,
   ExamineeSeriesList,
   ExamineeSeriesDetails,
+  SeedTestQuestions,
 } from './pages';
 
 // Component to wire loading callbacks
@@ -142,6 +143,9 @@ function App() {
                 <Route path="/tests/:testId/edit" element={<TestForm />} />
                 <Route path="/tests/:testId/sections/:sectionId/questions" element={<TestQuestions />} />
                 <Route path="/tests/:testId/details" element={<TestDetails />} />
+
+                {/* Admin dev tools */}
+                <Route path="/admin/seed-questions" element={<SeedTestQuestions />} />
               </Route>
 
               {/* Examinee Routes */}

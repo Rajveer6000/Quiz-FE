@@ -330,12 +330,10 @@ const SeriesDetails = () => {
                             Edit Details
                         </Button>
                         {series.status !== STATUS.PUBLISHED && (
-                            <div title={tests.some(t => !t.isPublished) ? "All tests must be published before publishing the series" : ""}>
+                            <div title={tests.some(t => !t.isPublished) ? "Draft tests will be published automatically" : ""}>
                                 <Button
                                     variant="accent"
                                     onClick={() => setPublishModalOpen(true)}
-                                    disabled={tests.some(t => !t.isPublished)}
-                                    className={tests.some(t => !t.isPublished) ? "opacity-50 cursor-not-allowed" : ""}
                                 >
                                     <Check className="w-4 h-4" />
                                     Publish Series
@@ -547,7 +545,7 @@ const SeriesDetails = () => {
                 }
             >
                 <p>Are you sure you want to publish this series? <br />
-                    <span className="text-sm text-gray-400">It will become visible to users.</span></p>
+                    <span className="text-sm text-gray-400">Any draft tests will be published automatically, then the series becomes visible to users.</span></p>
             </Modal>
 
             {/* Remove Test Confirmation Modal */}
