@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Loader, PageHeader } from '../components/common';
 import { seriesApi } from '../api';
 import { Layers, Search, ArrowRight, Calendar, Tag } from 'lucide-react';
-import { STATUS, STATUS_LABELS } from '../constants/constants';
 
 const formatPrice = (currency, amount) => {
   if (amount === null || amount === undefined) return 'N/A';
@@ -113,16 +112,12 @@ const ExamineeSeriesList = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {series.map((item) => {
-            const statusLabel = STATUS_LABELS[item.status] || 'Draft';
-            const statusVariant = item.status === STATUS.PUBLISHED ? 'success' : 'warning';
-
             return (
               <Card key={item.id} hover className="flex flex-col gap-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="accent" dot>{item.code}</Badge>
-                      <Badge variant={statusVariant}>{statusLabel}</Badge>
                     </div>
                     <h3 className="text-xl font-semibold text-white leading-tight">
                       {item.name}

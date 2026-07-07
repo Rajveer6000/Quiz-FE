@@ -5,7 +5,7 @@
 
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context';
-import { MODULES } from '../../constants/constants';
+import { ADMIN_MENU_ITEMS } from '../../constants/constants';
 import {
   LayoutDashboard,
   Users,
@@ -17,69 +17,37 @@ import {
   GraduationCap,
   BookOpen,
   UsersRound,
-  Layers
+  Layers,
+  Sparkles,
 } from 'lucide-react';
+
+const ICON_MAP = {
+  LayoutDashboard,
+  Users,
+  Shield,
+  ClipboardList,
+  GraduationCap,
+  BookOpen,
+  UsersRound,
+  Layers,
+  Sparkles,
+  HelpCircle,
+};
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const { user, logout, isExaminee, isStaff, canRead } = useAuth();
 
-  const staffMenuItems = [
-    {
-      path: '/',
-      icon: LayoutDashboard,
-      label: 'Dashboard',
-      visible: true
-    },
-    {
-      path: '/users',
-      icon: Users,
-      label: 'Users',
-      visible: canRead(MODULES.USERS)
-    },
-    {
-      path: '/examinees',
-      icon: GraduationCap,
-      label: 'Examinees',
-      visible: canRead(MODULES.USERS)
-    },
-    {
-      path: '/groups',
-      icon: UsersRound,
-      label: 'Groups',
-      visible: canRead(MODULES.USERS)
-    },
-    {
-      path: '/allocations',
-      icon: ClipboardList,
-      label: 'Allocations',
-      visible: canRead(MODULES.QUIZZES) // Allocations related to tests
-    },
-    {
-      path: '/roles',
-      icon: Shield,
-      label: 'Roles',
-      visible: canRead(MODULES.ROLES)
-    },
-    {
-      path: '/tests',
-      icon: BookOpen,
-      label: 'Quizzes',
-      visible: canRead(MODULES.QUIZZES)
-    },
-    {
-      path: '/series',
-      icon: Layers,
-      label: 'Series',
-      visible: canRead(MODULES.QUIZZES)
-    },
-    // {
-    //   path: '/questions',
-    //   icon: HelpCircle,
-    //   label: 'Questions',
-    //   visible: canRead(MODULES.QUIZZES)
-    // },
-  ];
+  const staffMenuItems = ADMIN_MENU_ITEMS.filter((item) => {
+    if (item.visible === false) return false;
+    if (item.module && !canRead(item.module)) return false;
+    return true;
+  }).map((item) => ({
+    path: item.path,
+    icon: ICON_MAP[item.icon] || BookOpen,
+    label: item.label,
+    visible: true,
+  }));
 
   const examineeMenuItems = [
     { path: '/examinee', icon: LayoutDashboard, label: 'Dashboard', visible: true },

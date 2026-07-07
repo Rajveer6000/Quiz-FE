@@ -275,6 +275,36 @@ export const WINDOW_EVENT_TYPES = {
 };
 
 // =============================================================================
+// ADMIN MENU (staff sidebar)
+// =============================================================================
+export const ADMIN_MENU_ITEMS = [
+  { path: '/', icon: 'LayoutDashboard', label: 'Dashboard', module: null, visible: true },
+  { path: '/users', icon: 'Users', label: 'Users', module: MODULES.USERS },
+  { path: '/examinees', icon: 'GraduationCap', label: 'Examinees', module: MODULES.USERS },
+  { path: '/groups', icon: 'UsersRound', label: 'Groups', module: MODULES.USERS },
+  { path: '/allocations', icon: 'ClipboardList', label: 'Allocations', module: MODULES.QUIZZES },
+  { path: '/roles', icon: 'Shield', label: 'Roles', module: MODULES.ROLES },
+  { path: '/tests', icon: 'BookOpen', label: 'Quizzes', module: MODULES.QUIZZES },
+  { path: '/series', icon: 'Layers', label: 'Series', module: MODULES.QUIZZES },
+  {
+    path: '/admin/seed-questions',
+    icon: 'Sparkles',
+    label: 'Seed Questions',
+    module: MODULES.QUIZZES,
+    devOnly: true,
+  },
+];
+
+// =============================================================================
+// TEST QUESTION SEED (admin bulk-fill tool)
+// =============================================================================
+export const TEST_QUESTION_SEED = {
+  /** Default test ID pre-filled on the Seed Questions page — change to your draft test */
+  DEFAULT_TEST_ID: 68,
+  MAX_RETRIES: 3,
+};
+
+// =============================================================================
 // PAGINATION DEFAULTS
 // =============================================================================
 export const PAGINATION = {

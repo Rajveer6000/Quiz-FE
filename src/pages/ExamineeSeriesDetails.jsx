@@ -21,7 +21,6 @@ import {
   RefreshCw,
   Play
 } from 'lucide-react';
-import { STATUS, STATUS_LABELS } from '../constants/constants';
 
 const formatPrice = (currency, amount) => {
   if (amount === null || amount === undefined) return 'N/A';
@@ -280,9 +279,6 @@ const ExamineeSeriesDetails = () => {
     );
   }
 
-  const statusVariant = series.status === STATUS.PUBLISHED ? 'success' : 'warning';
-  const statusLabel = STATUS_LABELS[series.status] || 'Draft';
-
   return (
     <div className="space-y-6 pb-10">
       <PageHeader
@@ -301,7 +297,6 @@ const ExamineeSeriesDetails = () => {
         <Card.Content className="grid grid-cols-1 md:grid-cols-2 gap-6 relative overflow-hidden">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Badge variant={statusVariant} dot>{statusLabel}</Badge>
               <Badge variant="accent">{series.currency || 'INR'}</Badge>
               {series.isPurchased && (
                 <Badge variant="success">Purchased</Badge>
@@ -389,9 +384,6 @@ const ExamineeSeriesDetails = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-500">#{item.displayOrder || idx + 1}</span>
                     <p className="font-semibold text-white">{test.name || 'Untitled Test'}</p>
-                    <Badge variant={test.isPublished ? 'success' : 'warning'}>
-                      {test.isPublished ? 'Published' : 'Draft'}
-                    </Badge>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-gray-400 mt-1 flex-wrap">
                     <span className="flex items-center gap-1">
